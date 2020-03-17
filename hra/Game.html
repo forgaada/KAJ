@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hra - Plácni koronu</title>
+    <style>
+        body {
+            font-family: Geneva, Verdana, sans-serif;
+            font-size: 12px;
+        }
+
+        .info {
+            margin-top: 5px;
+            font-size: 12px;
+        }
+
+        #playground {
+            border: 1px solid #a0a0a0;
+            width: 600px;
+            height: 470px;
+            position: relative;
+        }
+        #world {
+            position: absolute;
+            bottom: 0px;
+            cursor: none;
+        }
+
+        #game_over {
+            position: relative;
+            top: 150px;
+            margin: 0 auto;
+            padding: 15px;
+            width:300px;
+            font-size: 25px;
+            text-align: center;
+            border: 2px solid black;
+            border-radius: 8px;
+            background-color: #802913;
+            color: #ff907d;
+            visibility: hidden;
+        }
+        #game_winner {
+            position: relative;
+            top: 150px;
+            margin: 0 auto;
+            padding: 15px;
+            width:300px;
+            font-size: 25px;
+            text-align: center;
+            border: 2px solid black;
+            border-radius: 8px;
+            background-color: #00804f;
+            color: #b5ffa5;
+            visibility: hidden;
+        }
+
+        #virus {
+            position: absolute;
+            top:250px;
+            left:250px;
+            background: url(vir.png) no-repeat;
+            background-size: cover;
+            width: 70px;
+            height: 60px;
+            cursor: none;
+        }
+        #hand {
+            position: absolute;
+            top:100px;
+            left:100px;
+            background: url("hand.png") no-repeat;
+            background-size: cover;
+            width: 60px;
+            height: 60px;
+            cursor: none;
+        }
+        #score {
+            font-size: 14px;
+            color: #11004a;
+        }
+        #death {
+            background-color: darkred;
+            width: 0px;
+            height: 40px;
+        }
+    </style>
+</head>
+<body>
+<h2>Hra - Plácni koronu</h2>
+
+<h4>Popis hry: </h4>
+<p>
+    Cílem hry je plácnout alespoň 20 virů za půl minuty, dříve než zesílí a zničí tě.
+    <br>
+    Pokud virus mineš, nebo ani nezasáhneš, tak zesílí a bude se přemisťovat rychleji (zesílí 5krát, poté prohráváš).
+    <br>
+    Ovládání hry:
+<ul>
+    <li>Plácnutí viru: mezerník / levé tlačítko myši</li>
+    <li>Pohyb: šipkami, W/S/A/D a nebo myší</li>
+    <li>Konec: Escape</li>
+
+</ul>
+</p>
+<div id="death"></div>
+<div id='playground'>
+    <button id="new_game">Nová hra</button>
+    <button id="restart_game">Restart</button>
+    <div id="score">Skóre: </div>
+    <div id="time">Zbývající čas: </div>
+    <img id="world" alt="world">
+    <div id="virus"></div>
+    <div id="hand"></div>
+    <div id="game_over">VIRUS TĚ ZNIČIL</div>
+    <div id="game_winner">PORAZIL JSI VIRUS</div>
+</div>
+
+<footer class="info">
+    <p>Created by Adam Forgáč</p>
+</footer>
+<script>
+
+    class Player {
+        constructor(element_id, x, y, game) {
+            this._element = document.getElementById(element_id);
+            this._posx = x;
+            this._posy = y;
+            this._score = 0;
+            this._game = game;
+        }
+
+        handleEvent(event) {
+            if (this._game.isInGame()) {
+                if (event.key === 'ArrowLeft' || event.key === 'a') {
+                    this.move_continually(0);
+                } else if (event.key === 'ArrowRight' || event.key === 'd') {
+                    this.move_continually(1);
+                } else if (event.key === 'ArrowUp' || event.key === 'w') {
+                    this.move_continually(2);
+                } else if (event.key === 'ArrowDown' || event.key === 's') {
+                    this.move_continually(3);
+                } else if (event.key === ' ') {
+                    this.check_collision();
+                } else if (event.key === 'Escape') {
+                    this._game.game_over();
+                }
+            }
+        }
+
+        update () {
+            this._element.style.left =  this._posx + 'px';
+            this._element.style.top = this._posy + 'px';
+        }
+        move_left () {
+            if (this._posx >= 5) {this._posx = this._posx - 5;}
+            this.update();
+        }
+        move_right () {
+            if (this._posx <= 535) {this._posx = this._posx + 5;}
+            this.update();
+        }
+        move_top () {
+            if (this._posy >= 85) {this._posy = this._posy - 5;}
+            this.update();
+        }
+        move_down () {
+            if (this._posy <= 415) {this._posy = this._posy + 5};
+            this.update();
+        }
+
+        move_continually (direction_key) {
+            if (direction_key === 0) {
+                const move = setInterval(() => this.move_left(), 20);
+                document.addEventListener("keydown", function() {
+                    clearInterval(move);
+                });
+            } else if (direction_key === 1) {
+                const move = setInterval(() => this.move_right(), 20);
+                document.addEventListener("keydown", function() {
+                    clearInterval(move);
+                });
+            } else if (direction_key === 2) {
+                const move = setInterval(() => this.move_top(), 20);
+                document.addEventListener("keydown", function() {
+                    clearInterval(move);
+                });
+            } else if (direction_key === 3) {
+                const move = setInterval(() => this.move_down(), 20);
+                document.addEventListener("keydown", function() {
+                    clearInterval(move);
+                });
+            }
+        }
+
+        spawn (x,y) {
+            if (x <= 535 && x >=5) {this._posx = x}
+            if (y >= 85 && y <= 415) {this._posy = y}
+            this.update();
+        }
+
+        check_collision () {
+            this.handZoomIn();
+            if (Math.abs(this._posx-this._game._virus._posx)<50 && Math.abs(this._posy-this._game._virus._posy)<50) {
+                if (!this._game._virus._hit) {this._score += 1}
+                this._game._virus._hit = true;
+                document.querySelector('#score').innerHTML = `Skóre: ${this._score}`;
+                var krtekElement = document.getElementById("virus");
+                krtekElement.style.visibility = "hidden";
+                if (this._score >= 20) {this._game.game_winner()}
+            } else {
+                this._game._virus.increaseDeathMeter();
+            }
+        }
+
+        handZoomIn () {
+            var handElement = document.getElementById("hand");
+            handElement.style.height = 40+"px";
+            handElement.style.width = 40+"px";
+            setTimeout(()=>{
+                handElement.style.height = 50+"px";
+                handElement.style.width = 50+"px";},50);
+            setTimeout(()=>{
+                handElement.style.height = 60+"px";
+                handElement.style.width = 60+"px";},100);
+        }
+    }
+
+    class Virus {
+        constructor(element_id, x, y, game) {
+            this._element = document.getElementById(element_id);
+            this._posx = x;
+            this._posy = y;
+            this._dissapeared = null;
+            this._hit = false;
+            this._spawninterval = 1000;
+            this._game = game;
+        }
+
+        update () {
+            this._element.style.left =  this._posx + 'px';
+            this._element.style.top = this._posy + 'px';
+        }
+
+        get_spawn_location() {
+            return new Promise(resolve => {
+                setTimeout(() => {
+                    resolve([Math.floor(Math.random()*530)+5,Math.floor(Math.random()*330)+85]);
+                }, 500);
+            });
+        }
+
+        increaseDeathMeter () {
+            if (this._game._dissapearedViruses<7) {this._game._dissapearedViruses++}
+            var deathNumber = this._game._dissapearedViruses *100-100;
+            document.getElementById("death").style.width = deathNumber + 'px';
+        }
+
+        async disappear () {
+            if (!this._hit) {
+                this.increaseDeathMeter();
+                this._hit = true;
+            }
+            if (this._spawninterval >= 500) {this._spawninterval -= 20}
+            if (this._game._dissapearedViruses > 6) {this._game.game_over()}
+            var element = document.getElementById("virus");
+            element.style.visibility = "hidden";
+            const [px,py] = await this.get_spawn_location();
+            this.spawn(px,py);
+            element.style.visibility = "visible";
+            this._dissapeared = setTimeout(() => {if(this._game._inGame){this.disappear()}}, this._spawninterval);
+        }
+
+        resetSpawnInterval() {
+            this._spawninterval = 1000;
+        }
+
+        spawn (x,y) {
+            if (x <= 535 && x >=5) {this._posx = x}
+            if (y >= 85 && y <= 415) {this._posy = y}
+            this._hit = false;
+            this.update();
+        }
+    }
+
+    class World {
+        constructor(map_src,sizeX, sizeY) {
+            this._map_src = map_src;
+            this._sizeX = sizeX;
+            this._sizeY = sizeY;
+        }
+        update_world_map (){
+            document.getElementById("world").style.width = this._sizeX +"px";
+            document.getElementById("world").style.height = this._sizeY +"px";
+            document.getElementById("world").src = this._map_src;
+        }
+    }
+
+    class Game {
+        constructor() {
+            this._inGame = false;
+            this._gameTimeLeft = 0;
+            this._dissapearedViruses = 0;
+            this._hand = new Player("hand",100,100,this);
+            this._virus = new Virus("virus",250, 250,this);
+            this._gameTimeInterval = null;
+        }
+
+        playNewGame() {
+            this._virus.resetSpawnInterval();
+            this._hand._score = 0;
+            this._dissapearedViruses = 0;
+            this._inGame = true;
+            this._gameTimeLeft = 30;
+            this._gameTimeInterval = setInterval(function () {
+                this._gameTimeLeft -= 1;
+                if (this._gameTimeLeft === 0) {this.game_over()}
+                this.setTimeToHit(this._gameTimeLeft);
+            }.bind(this), 1000);
+            this._hand.update();
+            this._virus.update();
+            this._virus.disappear();
+            document.getElementById("game_over").style.visibility = "hidden";
+            document.getElementById("game_winner").style.visibility = "hidden";
+            document.querySelector('#score').innerHTML = `Skóre: 0`;
+            document.getElementById("new_game").blur();
+        }
+
+        cursorMovement(e) {
+            if (this._inGame) {
+                var x = e.clientX - 20;
+                var y = e.clientY - 250;
+                this._hand.spawn(x,y);
+            }
+        }
+
+        game_over() {
+            this._inGame = false;
+            document.getElementById("game_over").style.visibility = "visible";
+            clearInterval(this._gameTimeInterval);
+            clearTimeout(this._virus._dissapeared);
+        }
+
+        game_winner() {
+            this._inGame = false;
+            document.getElementById("game_winner").style.visibility = "visible";
+            clearInterval(this._gameTimeInterval);
+            clearTimeout(this._virus._dissapeared);
+        }
+
+        setTimeToHit (time) {
+            var timeElement = document.getElementById("time");
+            timeElement.innerHTML = `Zbývající čas: ${time}`;
+            if (time<5) {timeElement.style.color = "solid red"}
+            else {timeElement.style.color = "black"}
+        }
+
+        isInGame () {
+            return this._inGame;
+        }
+    }
+
+    var game = new Game();
+    var world = new World("world.jpg",600,400);
+    world.update_world_map();
+
+    document.addEventListener("keydown", game._hand);
+
+    document.querySelector("#world").addEventListener("mousemove",function (event) {
+        game.cursorMovement(event);
+    });
+    document.querySelector("#virus").addEventListener("mousemove",function (event) {
+        game.cursorMovement(event);
+    },true);
+    document.querySelector("#hand").addEventListener("mousemove",function (event) {
+        game.cursorMovement(event);
+    },true);
+
+    document.querySelector("#hand").addEventListener("click",function (e) {
+        if (e.button === 0) {
+            game._hand.check_collision();
+        }
+    },true);
+
+    var gameButton = document.getElementById("new_game");
+    var restartButton = document.getElementById("restart_game");
+
+    gameButton.addEventListener('click',function (e) {
+        e.preventDefault();
+        if (!game.isInGame()) {
+            game.playNewGame();
+        } else {
+            game.game_over();
+        }
+    });
+
+    restartButton.addEventListener('click',function (e) {
+        e.preventDefault();
+        location.reload();
+    });
+
+</script>
+</body>
+</html>
