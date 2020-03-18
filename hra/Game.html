@@ -6,6 +6,7 @@
     <title>Hra - Plácni koronu</title>
     <style>
         body {
+            overflow: hidden;
             font-family: Geneva, Verdana, sans-serif;
             font-size: 12px;
         }
@@ -213,10 +214,6 @@
                     document.querySelector('#score').innerHTML = `Skóre: ${this._score} Počet virů: ${this._game._virusCounter}`;
                     var krtekElement = document.getElementById(virus._elementId);
                     krtekElement.style.visibility = "hidden";
-                    if (this._score >= 20) {this._game.game_winner()}
-                    if (this._score === 5) {this._game.addNewVirus()}
-                    if (this._score === 10) {this._game.addNewVirus()}
-                    if (this._score === 15) {this._game.addNewVirus()}
                     break;
                 }
             }
@@ -227,6 +224,15 @@
                 if (this._game._viruses[0]._dissapearedViruses===6) {
                     this._game.game_over();
                 }
+            }
+            if (this._game._viruses.length<4) {
+                if (this._score === 5) {this._game.addNewVirus();this._game._dissapearedViruses--;}
+                if (this._score === 10) {this._game.addNewVirus(); this._game._dissapearedViruses--;}
+                if (this._score === 15) {this._game.addNewVirus(); this._game._dissapearedViruses--;}
+                this._game.setDeathMeter();
+            }
+            if (this._score >= 20) {
+                this._game.game_winner();
             }
         }
 
@@ -286,7 +292,7 @@
             const [px,py] = await this.get_spawn_location();
             this.spawn(px,py);
             element.style.visibility = "visible";
-            this._dissapeared = setTimeout(() => {if(this._game._inGame){this.disappear()}}, this._spawninterval);
+            this._dissapeared = setTimeout(() => {this.disappear()}, this._spawninterval);
         }
 
         resetSpawnInterval() {
@@ -326,9 +332,10 @@
         }
 
         playNewGame() {
-            this._viruses = [];
             this._virusCounter = 0;
+            this._viruses = [];
             this.addNewVirus();
+            document.getElementById("death").style.width = 0 + 'px';
             this._hand._score = 0;
             this._dissapearedViruses = 1;
             this._inGame = true;
@@ -339,6 +346,7 @@
                 this.setTimeToHit(this._gameTimeLeft);
             }.bind(this), 1000);
             this._hand.update();
+            gameButton.disabled = true;
             document.getElementById("game_over").style.visibility = "hidden";
             document.getElementById("game_winner").style.visibility = "hidden";
             document.querySelector('#score').innerHTML = `Skóre: 0`;
@@ -369,8 +377,8 @@
 
         cursorMovement(e) {
             if (this._inGame) {
-                var x = e.clientX - 20;
-                var y = e.clientY - 250;
+                const x = e.clientX - 20;
+                const y = e.clientY - 250;
                 this._hand.spawn(x,y);
             }
         }
@@ -380,6 +388,7 @@
             document.getElementById("game_over").style.visibility = "visible";
             clearInterval(this._gameTimeInterval);
             for (let vir of this._viruses) {
+                vir.update();
                 document.getElementById(vir._elementId).style.visibility = "hidden";
                 clearTimeout(vir._dissapeared);
                 vir.resetSpawnInterval();
@@ -398,10 +407,15 @@
         }
 
         setTimeToHit (time) {
-            var timeElement = document.getElementById("time");
+            const timeElement = document.getElementById("time");
             timeElement.innerHTML = `Zbývající čas: ${time}`;
             if (time<5) {timeElement.style.color = "solid red"}
             else {timeElement.style.color = "black"}
+        }
+
+        setDeathMeter () {
+            const deathNumber = this._dissapearedViruses * 100 - 100;
+            document.getElementById("death").style.width = deathNumber + 'px';
         }
 
         isInGame () {
@@ -409,8 +423,8 @@
         }
     }
 
-    var game = new Game();
-    var world = new World("world.jpg",600,400);
+    let game = new Game();
+    let world = new World("world.jpg",600,400);
     world.update_world_map();
 
     document.addEventListener("keydown", game._hand);
@@ -427,8 +441,8 @@
         }
     },true);
 
-    var gameButton = document.getElementById("new_game");
-    var restartButton = document.getElementById("restart_game");
+    const gameButton = document.getElementById("new_game");
+    const restartButton = document.getElementById("restart_game");
 
     gameButton.addEventListener('click',function (e) {
         e.preventDefault();
