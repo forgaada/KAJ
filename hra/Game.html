@@ -6,7 +6,6 @@
     <title>Hra - Plácni koronu</title>
     <style>
         body {
-            overflow: hidden;
             font-family: Geneva, Verdana, sans-serif;
             font-size: 12px;
         }
@@ -212,8 +211,8 @@
                     if (!virus._hit) {this._score += 1}
                     virus._hit = true;
                     document.querySelector('#score').innerHTML = `Skóre: ${this._score} Počet virů: ${this._game._virusCounter}`;
-                    var krtekElement = document.getElementById(virus._elementId);
-                    krtekElement.style.visibility = "hidden";
+                    const element = document.getElementById(virus._elementId);
+                    element.style.visibility = "hidden";
                     break;
                 }
             }
@@ -226,9 +225,9 @@
                 }
             }
             if (this._game._viruses.length<4) {
-                if (this._score === 5) {this._game.addNewVirus();this._game._dissapearedViruses--;}
-                if (this._score === 10) {this._game.addNewVirus(); this._game._dissapearedViruses--;}
-                if (this._score === 15) {this._game.addNewVirus(); this._game._dissapearedViruses--;}
+                if (this._score === 5 && this._game._viruses.length<2) {this._game.addNewVirus();this._game._dissapearedViruses--;}
+                if (this._score === 10 && this._game._viruses.length<3) {this._game.addNewVirus(); this._game._dissapearedViruses--;}
+                if (this._score === 15 && this._game._viruses.length<4) {this._game.addNewVirus(); this._game._dissapearedViruses--;}
                 this._game.setDeathMeter();
             }
             if (this._score >= 20) {
@@ -281,13 +280,15 @@
         }
 
         async disappear () {
+            console.log(this._elementId);
+            if (this._game._gameIsOver) {return};
             if (!this._hit) {
                 this.increaseDeathMeter();
                 this._hit = true;
             }
             if (this._spawninterval >= 500) {this._spawninterval -= 25}
             if (this._game._dissapearedViruses > 6) {this._game.game_over()}
-            var element = document.getElementById(this._elementId);
+            const element = document.getElementById(this._elementId);
             element.style.visibility = "hidden";
             const [px,py] = await this.get_spawn_location();
             this.spawn(px,py);
@@ -329,9 +330,11 @@
             this._viruses = [];
             this._gameTimeInterval = null;
             this._virusCounter = 0;
+            this._gameIsOver = false;
         }
 
         playNewGame() {
+            this._gameIsOver = false;
             this._virusCounter = 0;
             this._viruses = [];
             this.addNewVirus();
@@ -356,7 +359,7 @@
         addNewVirus () {
             this._virusCounter++;
             let createdElement = document.createElement("div");
-            let newVirusId = "virus"+this._virusCounter;
+            let newVirusId = "virus"+this.getId();
             let posX = Math.floor(Math.random()*530)+5;
             let posY = Math.floor(Math.random()*330)+85;
             createdElement.id = newVirusId;
@@ -368,11 +371,11 @@
             this._viruses.push(newVirus);
             newVirus.update();
             newVirus.disappear();
-            document.body.addEventListener('mousemove',function(e){
-                if(e.srcElement.id== newVirusId){
-                    game.cursorMovement(e);
-                }
-            });
+            dynamicEventListenerAdder(this,newVirusId);
+        }
+
+        getId () {
+            return '_' + Math.random().toString(36).substr(2, 9);
         }
 
         cursorMovement(e) {
@@ -384,32 +387,43 @@
         }
 
         game_over() {
+            this._gameIsOver = true;
+            if (!this._inGame) {return};
             this._inGame = false;
             document.getElementById("game_over").style.visibility = "visible";
             clearInterval(this._gameTimeInterval);
-            for (let vir of this._viruses) {
-                vir.update();
-                document.getElementById(vir._elementId).style.visibility = "hidden";
-                clearTimeout(vir._dissapeared);
-                vir.resetSpawnInterval();
-            }
+            setTimeout(() => {
+                for (let vir of this._viruses) {
+                    vir.update();
+                    document.getElementById(vir._elementId).style.visibility = "hidden";
+                    clearTimeout(vir._dissapeared);
+                    vir.resetSpawnInterval();
+                }
+                gameButton.disabled = false;
+            },2500);
         }
 
         game_winner() {
+            this._gameIsOver = true;
+            if (!this._inGame) {return};
             this._inGame = false;
             document.getElementById("game_winner").style.visibility = "visible";
             clearInterval(this._gameTimeInterval);
-            for (let vir of this._viruses) {
-                document.getElementById(vir._elementId).style.visibility = "hidden";
-                clearTimeout(vir._dissapeared);
-                vir.resetSpawnInterval();
-            }
+            setTimeout(() => {
+                for (let vir of this._viruses) {
+                    vir.update();
+                    document.getElementById(vir._elementId).style.visibility = "hidden";
+                    clearTimeout(vir._dissapeared);
+                    vir.resetSpawnInterval();
+                }
+                gameButton.disabled = false;
+            },2500);
         }
 
         setTimeToHit (time) {
             const timeElement = document.getElementById("time");
             timeElement.innerHTML = `Zbývající čas: ${time}`;
-            if (time<5) {timeElement.style.color = "solid red"}
+            if (time<5) {timeElement.style.fontSize = 14+"px"}
             else {timeElement.style.color = "black"}
         }
 
@@ -440,6 +454,14 @@
             game._hand.check_collision();
         }
     },true);
+
+    function dynamicEventListenerAdder(gameElement, elementId) {
+        document.body.addEventListener('mousemove',function(e){
+            if(e.srcElement.id== elementId){
+                gameElement.cursorMovement(e);
+            }
+        });
+    }
 
     const gameButton = document.getElementById("new_game");
     const restartButton = document.getElementById("restart_game");
