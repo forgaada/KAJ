@@ -56,7 +56,7 @@
             visibility: hidden;
         }
 
-        #virus {
+        .vir {
             position: absolute;
             top:250px;
             left:250px;
@@ -66,6 +66,7 @@
             height: 60px;
             cursor: none;
         }
+
         #hand {
             position: absolute;
             top:100px;
@@ -92,9 +93,9 @@
 
 <h4>Popis hry: </h4>
 <p>
-    Cílem hry je plácnout alespoň 20 virů za půl minuty, dříve než zesílí a zničí tě.
+    Cílem hry je plácnout alespoň 20 virů za půl minuty, dříve než zesílí a zničí tě. Viry se objevují náhodně.
     <br>
-    Pokud virus mineš, nebo ani nezasáhneš, tak zesílí a bude se přemisťovat rychleji (zesílí 5krát, poté prohráváš).
+    Pokud virus mineš, nebo ani nezasáhneš, tak zesílí a bude se přemisťovat rychleji a tvé skóre se sníží o 1.
     <br>
     Ovládání hry:
 <ul>
@@ -108,10 +109,9 @@
 <div id='playground'>
     <button id="new_game">Nová hra</button>
     <button id="restart_game">Restart</button>
-    <div id="score">Skóre: </div>
+    <div id="score">Skóre: Počet virů: </div>
     <div id="time">Zbývající čas: </div>
     <img id="world" alt="world">
-    <div id="virus"></div>
     <div id="hand"></div>
     <div id="game_over">VIRUS TĚ ZNIČIL</div>
     <div id="game_winner">PORAZIL JSI VIRUS</div>
@@ -202,15 +202,31 @@
 
         check_collision () {
             this.handZoomIn();
-            if (Math.abs(this._posx-this._game._virus._posx)<50 && Math.abs(this._posy-this._game._virus._posy)<50) {
-                if (!this._game._virus._hit) {this._score += 1}
-                this._game._virus._hit = true;
-                document.querySelector('#score').innerHTML = `Skóre: ${this._score}`;
-                var krtekElement = document.getElementById("virus");
-                krtekElement.style.visibility = "hidden";
-                if (this._score >= 20) {this._game.game_winner()}
-            } else {
-                this._game._virus.increaseDeathMeter();
+            let virWasHit = false;
+            let virusEl = null;
+            for (const virus of this._game._viruses) {
+                virusEl = virus;
+                if (Math.abs(this._posx-virus._posx)<50 && Math.abs(this._posy-virus._posy)<50) {
+                    virWasHit = true;
+                    if (!virus._hit) {this._score += 1}
+                    virus._hit = true;
+                    document.querySelector('#score').innerHTML = `Skóre: ${this._score} Počet virů: ${this._game._virusCounter}`;
+                    var krtekElement = document.getElementById(virus._elementId);
+                    krtekElement.style.visibility = "hidden";
+                    if (this._score >= 20) {this._game.game_winner()}
+                    if (this._score === 5) {this._game.addNewVirus()}
+                    if (this._score === 10) {this._game.addNewVirus()}
+                    if (this._score === 15) {this._game.addNewVirus()}
+                    break;
+                }
+            }
+            if (!virWasHit) {
+                this._game._hand._score--;
+                document.querySelector('#score').innerHTML = `Skóre: ${this._score} Počet virů: ${this._game._virusCounter}`;
+                this._game._viruses[0].increaseDeathMeter();
+                if (this._game._viruses[0]._dissapearedViruses===6) {
+                    this._game.game_over();
+                }
             }
         }
 
@@ -229,12 +245,13 @@
 
     class Virus {
         constructor(element_id, x, y, game) {
+            this._elementId = element_id;
             this._element = document.getElementById(element_id);
             this._posx = x;
             this._posy = y;
             this._dissapeared = null;
             this._hit = false;
-            this._spawninterval = 1000;
+            this._spawninterval = 2000;
             this._game = game;
         }
 
@@ -262,9 +279,9 @@
                 this.increaseDeathMeter();
                 this._hit = true;
             }
-            if (this._spawninterval >= 500) {this._spawninterval -= 20}
+            if (this._spawninterval >= 500) {this._spawninterval -= 25}
             if (this._game._dissapearedViruses > 6) {this._game.game_over()}
-            var element = document.getElementById("virus");
+            var element = document.getElementById(this._elementId);
             element.style.visibility = "hidden";
             const [px,py] = await this.get_spawn_location();
             this.spawn(px,py);
@@ -273,7 +290,7 @@
         }
 
         resetSpawnInterval() {
-            this._spawninterval = 1000;
+            this._spawninterval = 2000;
         }
 
         spawn (x,y) {
@@ -303,14 +320,17 @@
             this._gameTimeLeft = 0;
             this._dissapearedViruses = 0;
             this._hand = new Player("hand",100,100,this);
-            this._virus = new Virus("virus",250, 250,this);
+            this._viruses = [];
             this._gameTimeInterval = null;
+            this._virusCounter = 0;
         }
 
         playNewGame() {
-            this._virus.resetSpawnInterval();
+            this._viruses = [];
+            this._virusCounter = 0;
+            this.addNewVirus();
             this._hand._score = 0;
-            this._dissapearedViruses = 0;
+            this._dissapearedViruses = 1;
             this._inGame = true;
             this._gameTimeLeft = 30;
             this._gameTimeInterval = setInterval(function () {
@@ -319,12 +339,32 @@
                 this.setTimeToHit(this._gameTimeLeft);
             }.bind(this), 1000);
             this._hand.update();
-            this._virus.update();
-            this._virus.disappear();
             document.getElementById("game_over").style.visibility = "hidden";
             document.getElementById("game_winner").style.visibility = "hidden";
             document.querySelector('#score').innerHTML = `Skóre: 0`;
             document.getElementById("new_game").blur();
+        }
+
+        addNewVirus () {
+            this._virusCounter++;
+            let createdElement = document.createElement("div");
+            let newVirusId = "virus"+this._virusCounter;
+            let posX = Math.floor(Math.random()*530)+5;
+            let posY = Math.floor(Math.random()*330)+85;
+            createdElement.id = newVirusId;
+            createdElement.classList.add("vir");
+            createdElement.style.left = posX + "px";
+            createdElement.style.top = posY + "px";
+            document.querySelector("#world").insertAdjacentElement("afterend", createdElement);
+            let newVirus = new Virus(newVirusId,posX,posY, this);
+            this._viruses.push(newVirus);
+            newVirus.update();
+            newVirus.disappear();
+            document.body.addEventListener('mousemove',function(e){
+                if(e.srcElement.id== newVirusId){
+                    game.cursorMovement(e);
+                }
+            });
         }
 
         cursorMovement(e) {
@@ -339,14 +379,22 @@
             this._inGame = false;
             document.getElementById("game_over").style.visibility = "visible";
             clearInterval(this._gameTimeInterval);
-            clearTimeout(this._virus._dissapeared);
+            for (let vir of this._viruses) {
+                document.getElementById(vir._elementId).style.visibility = "hidden";
+                clearTimeout(vir._dissapeared);
+                vir.resetSpawnInterval();
+            }
         }
 
         game_winner() {
             this._inGame = false;
             document.getElementById("game_winner").style.visibility = "visible";
             clearInterval(this._gameTimeInterval);
-            clearTimeout(this._virus._dissapeared);
+            for (let vir of this._viruses) {
+                document.getElementById(vir._elementId).style.visibility = "hidden";
+                clearTimeout(vir._dissapeared);
+                vir.resetSpawnInterval();
+            }
         }
 
         setTimeToHit (time) {
@@ -370,13 +418,9 @@
     document.querySelector("#world").addEventListener("mousemove",function (event) {
         game.cursorMovement(event);
     });
-    document.querySelector("#virus").addEventListener("mousemove",function (event) {
-        game.cursorMovement(event);
-    },true);
     document.querySelector("#hand").addEventListener("mousemove",function (event) {
         game.cursorMovement(event);
     },true);
-
     document.querySelector("#hand").addEventListener("click",function (e) {
         if (e.button === 0) {
             game._hand.check_collision();
