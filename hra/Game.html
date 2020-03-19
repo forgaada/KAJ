@@ -275,19 +275,17 @@
 
         increaseDeathMeter () {
             if (this._game._dissapearedViruses<7) {this._game._dissapearedViruses++}
-            var deathNumber = this._game._dissapearedViruses *100-100;
-            document.getElementById("death").style.width = deathNumber + 'px';
+            else {this._game.game_over()}
+            this._game.setDeathMeter();
         }
 
         async disappear () {
-            console.log(this._elementId);
             if (this._game._gameIsOver) {return};
             if (!this._hit) {
                 this.increaseDeathMeter();
                 this._hit = true;
             }
             if (this._spawninterval >= 500) {this._spawninterval -= 25}
-            if (this._game._dissapearedViruses > 6) {this._game.game_over()}
             const element = document.getElementById(this._elementId);
             element.style.visibility = "hidden";
             const [px,py] = await this.get_spawn_location();
@@ -337,15 +335,14 @@
             this._gameIsOver = false;
             this._virusCounter = 0;
             this._viruses = [];
-            this.addNewVirus();
-            document.getElementById("death").style.width = 0 + 'px';
             this._hand._score = 0;
-            this._dissapearedViruses = 1;
+            this._dissapearedViruses = 0;
+            this.setDeathMeter();
             this._inGame = true;
             this._gameTimeLeft = 30;
             this._gameTimeInterval = setInterval(function () {
                 this._gameTimeLeft -= 1;
-                if (this._gameTimeLeft === 0) {this.game_over()}
+                if (this._gameTimeLeft <= 0) {this.game_over()}
                 this.setTimeToHit(this._gameTimeLeft);
             }.bind(this), 1000);
             this._hand.update();
@@ -354,6 +351,7 @@
             document.getElementById("game_winner").style.visibility = "hidden";
             document.querySelector('#score').innerHTML = `Skóre: 0`;
             document.getElementById("new_game").blur();
+            this.addNewVirus();
         }
 
         addNewVirus () {
@@ -399,6 +397,7 @@
                     clearTimeout(vir._dissapeared);
                     vir.resetSpawnInterval();
                 }
+                gameButton.disabled = false;
             },2500);
         }
 
@@ -427,7 +426,7 @@
         }
 
         setDeathMeter () {
-            const deathNumber = this._dissapearedViruses * 100 - 100;
+            const deathNumber = this._dissapearedViruses * 100 -100;
             document.getElementById("death").style.width = deathNumber + 'px';
         }
 
