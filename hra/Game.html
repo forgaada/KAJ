@@ -129,10 +129,13 @@
             this._posy = y;
             this._score = 0;
             this._game = game;
+            this._moveInterval = null;
+            this._keyMovementSpeed = 13;
         }
 
         handleEvent(event) {
             if (this._game.isInGame()) {
+                clearInterval(this._moveInterval);
                 if (event.key === 'ArrowLeft' || event.key === 'a') {
                     this.move_continually(0);
                 } else if (event.key === 'ArrowRight' || event.key === 'd') {
@@ -172,25 +175,13 @@
 
         move_continually (direction_key) {
             if (direction_key === 0) {
-                const move = setInterval(() => this.move_left(), 20);
-                document.addEventListener("keydown", function() {
-                    clearInterval(move);
-                });
+                this._moveInterval = setInterval(() => this.move_left(), this._keyMovementSpeed);
             } else if (direction_key === 1) {
-                const move = setInterval(() => this.move_right(), 20);
-                document.addEventListener("keydown", function() {
-                    clearInterval(move);
-                });
+                this._moveInterval = setInterval(() => this.move_right(), this._keyMovementSpeed);
             } else if (direction_key === 2) {
-                const move = setInterval(() => this.move_top(), 20);
-                document.addEventListener("keydown", function() {
-                    clearInterval(move);
-                });
+                this._moveInterval = setInterval(() => this.move_top(), this._keyMovementSpeed);
             } else if (direction_key === 3) {
-                const move = setInterval(() => this.move_down(), 20);
-                document.addEventListener("keydown", function() {
-                    clearInterval(move);
-                });
+                this._moveInterval = setInterval(() => this.move_down(), this._keyMovementSpeed);
             }
         }
 
@@ -236,7 +227,7 @@
         }
 
         handZoomIn () {
-            var handElement = document.getElementById("hand");
+            const handElement = document.getElementById("hand");
             handElement.style.height = 40+"px";
             handElement.style.width = 40+"px";
             setTimeout(()=>{
@@ -331,6 +322,10 @@
             this._gameIsOver = false;
         }
 
+        getPlayerHand () {
+            return this._hand;
+        }
+
         playNewGame() {
             this._gameIsOver = false;
             this._virusCounter = 0;
@@ -378,6 +373,7 @@
 
         cursorMovement(e) {
             if (this._inGame) {
+                clearInterval(this.getPlayerHand()._moveInterval);
                 const x = e.clientX - 20;
                 const y = e.clientY - 250;
                 this._hand.spawn(x,y);
@@ -386,7 +382,7 @@
 
         game_over() {
             this._gameIsOver = true;
-            if (!this._inGame) {return};
+            if (!this._inGame) {return}
             this._inGame = false;
             document.getElementById("game_over").style.visibility = "visible";
             clearInterval(this._gameTimeInterval);
@@ -438,6 +434,12 @@
     let game = new Game();
     let world = new World("world.jpg",600,400);
     world.update_world_map();
+
+    document.body.addEventListener("keydown", function (e) {
+        if (e.key === ' ' || e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+            e.preventDefault();
+        }
+    },true);
 
     document.addEventListener("keydown", game._hand);
 
