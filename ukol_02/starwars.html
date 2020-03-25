@@ -26,6 +26,41 @@
     </section>
 
     <script>
+
+        const xmlHttpRequest = new XMLHttpRequest();
+        const url = "https://swapi.co/api/people/";
+
+        xmlHttpRequest.onreadystatechange = function() {
+            if (this.readyState === 4 && this.status === 200) {
+                const parsedJSONObject = JSON.parse(this.responseText);
+                convertJSONtoList(parsedJSONObject, "star-wars");
+            }
+        };
+
+        xmlHttpRequest.open("GET", url, true);
+        xmlHttpRequest.send();
+
+        function convertJSONtoList(parsedObject, listObjectID) {
+            const json_data = parsedObject;
+            const list = document.getElementById(listObjectID);
+
+            for (const i of json_data.results) {
+                const li = document.createElement("li");
+                li.appendChild(document.createTextNode(i.name));
+                list.appendChild(li);
+            }
+        }
+
+        function fetchFunction(url) {
+            fetch(url)
+                .then((response) => {
+                    return response.json();
+                })
+                .then((data) => {
+                    console.log(data);
+                });
+        }
+
         /*
             urls:
                 HTTP API with JSON response of StarWars characters
