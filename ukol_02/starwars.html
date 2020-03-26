@@ -27,39 +27,106 @@
 
     <script>
 
-        const xmlHttpRequest = new XMLHttpRequest();
         const url = "https://swapi.co/api/people/";
+        const maps_url = "https://api.mapy.cz/geocode?query=praha";
 
-        xmlHttpRequest.onreadystatechange = function() {
-            if (this.readyState === 4 && this.status === 200) {
-                const parsedJSONObject = JSON.parse(this.responseText);
-                convertJSONtoList(parsedJSONObject, "star-wars");
-            }
-        };
+        function errorLog(err) {
+            console.log('Error Occurred :', err);
+        }
 
-        xmlHttpRequest.open("GET", url, true);
-        xmlHttpRequest.send();
-
-        function convertJSONtoList(parsedObject, listObjectID) {
-            const json_data = parsedObject;
+        function convertDataObjectToList(parsedObject, listObjectID) {
+            const data = parsedObject;
             const list = document.getElementById(listObjectID);
 
-            for (const i of json_data.results) {
+            for (const i of data.results) {
                 const li = document.createElement("li");
                 li.appendChild(document.createTextNode(i.name));
                 list.appendChild(li);
             }
         }
 
-        function fetchFunction(url) {
-            fetch(url)
-                .then((response) => {
-                    return response.json();
-                })
-                .then((data) => {
-                    console.log(data);
-                });
+        // TASK 1 + 2 : Function uses XMLHttpRequest to create HTTP request and exposes Promises interface
+
+                // function myRequest(url) {
+                //     return new Promise((resolve, reject) => {
+                //         const xhr = new XMLHttpRequest();
+                //         xhr.open('GET', url);
+                //
+                //         xhr.onload = function() {
+                //             if (xhr.readyState === 4 && xhr.status === 200) {
+                //                 const parsedJSONObject = JSON.parse(xhr.responseText);
+                //                 resolve(parsedJSONObject);
+                //             }
+                //             else {
+                //                 reject(Error(xhr.statusText));
+                //             }
+                //         };
+                //         xhr.onerror = function() {
+                //             reject(Error("Network Error"));
+                //         };
+                //         xhr.send();
+                //     });
+                // }
+
+        //TASK 3 + 4: browser's fetch API and async/await used for interaction with myRequest and fetch
+
+        async function myRequest (url) {
+            let response = await fetch(url);
+            if (response.ok) {
+                return response.json();
+            } else {
+                return response.error();
+            }
+
         }
+
+        myRequest(url)
+            .then(response => {
+                convertDataObjectToList(response,"star-wars");
+            })
+            .catch(error => {
+                errorLog(error);
+            });
+
+        // BONUS TASK 1: Websocket chat
+
+        const socket = new WebSocket('ws://salty-peak-74076.herokuapp.com/');
+
+        document.body.addEventListener("keydown", function (e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                socket.send(document.getElementById("chat-input").value)
+                document.getElementById("chat-input").value = "";
+            }
+        });
+
+        socket.addEventListener('message', function (event) {
+            document.getElementById("chat").value += event.data + '\r';
+        });
+
+        // BONUS TASK 2: Mapy.cz API with XML response
+
+        let xhr = new XMLHttpRequest();
+        xhr.onload = function() {
+            const list = document.getElementById("mapy");
+            let xmlDoc = xhr.responseXML;
+            const nsResolver = xmlDoc.createNSResolver(xmlDoc.ownerDocument == null ? xmlDoc.documentElement : xmlDoc.ownerDocument.documentElement);
+            const personIterator = xmlDoc.evaluate('//item', xmlDoc, nsResolver, XPathResult.ANY_TYPE, null);
+            let thisNode = personIterator.iterateNext();
+
+            while (thisNode) {
+                    const li = document.createElement("li");
+                    li.appendChild(document.createTextNode(xmlDoc.getElementById(thisNode.id).getAttribute("title")));
+                    list.appendChild(li);
+                    thisNode = personIterator.iterateNext();
+                }
+        };
+        xhr.onerror = function() {
+            console.error("Error while getting XML.");
+        };
+        xhr.open("GET", maps_url);
+        xhr.responseType = "document";
+        xhr.send();
 
         /*
             urls:
