@@ -2,12 +2,13 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Calories calculator</title>
+    <title>Kalkulačka kalorií</title>
 
     <style>
         body {
             margin: 0;
-            font-family: "Bookman Old Style",serif;
+            font-family: "Bookman Old Style", "S", serif;
+            background-color: #e1ebe8;
         }
 
         .page {
@@ -15,13 +16,15 @@
             flex-direction: column;
             min-height: 100vh;
         }
+
         .page header {
             display: flex;
             align-items: center;
             justify-content: center;
             width: 100%;
             height: 100px;
-            background: #07e612;
+            background: #348022;
+            color: white;
         }
         .page section {
             display: flex;
@@ -30,56 +33,111 @@
             flex-grow: 1;
             min-height: 400px;
         }
+
+        /** NAVIGATION SECTION **/
+
         .page section nav {
             display: flex;
             flex-direction: column;
-            justify-content: start;
-            background: #00804f;
-            padding: 1em;
+            padding: 0.5em;
+            margin: 0;
             white-space: nowrap;
         }
+
+        #menu ul {
+            margin: 0;
+            padding: 0;
+        }
+
+        #menu ul li {
+            display: block;
+            color: white;
+            align-content: center;
+            padding: 15px 30px;
+            margin: 5px;
+            background-color: #2fd015;
+            transition: all 0.5s;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+        }
+
+        #menu ul li a {
+            text-decoration: none;
+            color: white;
+        }
+        #menu ul li a:visited { text-decoration: none;}
+        #menu ul li a:hover { text-decoration: none;}
+        #menu ul li a:focus { text-decoration: none;}
+
+        #menu ul li:hover {
+            background: #348022;
+        }
+
+        /*#menu ul :nth-child(2n+1):hover + li {*/
+        /*    background-color: #256e2f;*/
+        /*}*/
+
+        /** MAIN MENU SECTION **/
+
         .page section main {
             display: flex;
-            justify-content: center;
+            justify-content: flex-start;
             flex-grow: 1;
             flex-direction: column;
-            background: lightgreen;
             padding: 1em;
         }
 
-        .page section main .images {
-            display: flex;
-            flex-wrap: wrap;
-            flex-grow: 1;
-            align-items: center;
-            align-content: center;
-            justify-content: center;
-        }
-        .page section main .images img {
-            margin: 10px;
-        }
+        /** ASIDE MENU SECTION **/
+
         .page section aside {
             display: flex;
             justify-content: center;
-            background: lightgoldenrodyellow;
-            width: 200px;
-            padding: 1em;
+            align-items: center;
+            flex-direction: column;
+            background-color: #2fd015;
+            width: 150px;
+            margin: 1em;
             box-sizing: border-box;
+            transition: width 1s;
         }
+
+        .page section aside .aside_images {
+            display: flex;
+            flex-wrap: wrap;
+            flex-grow: 1;
+            align-content: center;
+            justify-content: center;
+        }
+
+        .page section aside .aside_images img {
+            margin: 10px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+        }
+
+        .page section aside:hover {
+            width: 300px;
+        }
+
+        /** FOOTER **/
+
         .page footer {
             display: flex;
             align-items: center;
             justify-content: center;
             height: 50px;
             background: #08621d;
+            color: white;
         }
 
-        @media only screen and (max-width: 768px) {
+
+        /** MOBILE / TABLET SECTION **/
+
+        @media all and (max-width: 768px) {
             .page section {
                 flex-direction: column;
             }
             .page section nav {
                 order: 0;
+                padding-left: 0;
             }
             .page section main {
                 order: 1;
@@ -87,6 +145,12 @@
             .page section aside {
                 display: none;
             }
+            #menu {
+                display: inline;
+            }
+            #menu ul li {
+                 margin-bottom: 0;
+             }
         }
     </style>
 </head>
@@ -94,21 +158,28 @@
 
 <div class="page">
     <header>
-        <h1>Calories Calculator</h1>
+        <h1>Kalkulačka kalorií</h1>
     </header>
     <section>
-        <nav>
-            <h3>Menu</h3>
+        <nav id="menu">
             <ul class="main_menu">
-                <li>Home</li>
-                <li>Today Income</li>
-                <li>Settings</li>
+                <li>Domů</li>
+                <li>Denní příjem</li>
+                <li>Potraviny</li>
+                <li>Nastavení</li>
             </ul>
         </nav>
         <main>
-            <h2>Page content</h2>
-            <p>What have you been eating recently?</p>
-            <div class="images">
+            <h2>Kalkulátor denního kalorického příjmu</h2>
+            <p>Co jsi měl dnes k jídlu ?</p>
+
+        </main>
+        <aside>
+            <h4> Oblíbená jídla</h4>
+            <div class="aside_images">
+                <img src="http://satyr.io/100x100/white" width="100" height="100">
+                <img src="http://satyr.io/100x100/white" width="100" height="100">
+                <img src="http://satyr.io/100x100/white" width="100" height="100">
                 <img src="http://satyr.io/100x100/white" width="100" height="100">
                 <img src="http://satyr.io/100x100/white" width="100" height="100">
                 <img src="http://satyr.io/100x100/white" width="100" height="100">
@@ -119,13 +190,10 @@
                 <img src="http://satyr.io/100x100/white" width="100" height="100">
                 <img src="http://satyr.io/100x100/white" width="100" height="100">
             </div>
-        </main>
-        <aside>
-            <h3>Side Menu</h3>
         </aside>
     </section>
     <footer>
-        Footer
+        Created by Adam Forgáč | 2020 | CTU FEL Prague
     </footer>
 </div>
 
