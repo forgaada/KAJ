@@ -8,7 +8,7 @@
         body {
             margin: 0;
             font-family: "Bookman Old Style", "S", serif;
-            background-color: #e1ebe8;
+            background-color: #f0faf7;
         }
 
         .page {
@@ -53,7 +53,7 @@
             display: block;
             color: white;
             align-content: center;
-            padding: 15px 30px;
+            padding: 20px 30px;
             margin: 5px;
             background-color: #2fd015;
             transition: all 0.5s;
@@ -76,14 +76,68 @@
         /*    background-color: #256e2f;*/
         /*}*/
 
-        /** MAIN MENU SECTION **/
+        /** MAIN SECTION **/
 
-        .page section main {
+        .page section article {
             display: flex;
             justify-content: flex-start;
+            align-items: flex-start;
             flex-grow: 1;
             flex-direction: column;
             padding: 1em;
+        }
+
+        .page section article .content-box {
+            align-self: center;
+            flex-wrap: nowrap;
+            width: 400px;
+            display: flex;
+            justify-content: center;
+            align-content: start;
+            flex-direction: column;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+            background-color: #e6f0ed;
+        }
+
+        .page section article .content-box h4{
+            margin-top: 0;
+            background-color: #348022;
+            padding-top: 1em;
+            height: 40px;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-content: center;
+        }
+
+        .page section article .content-box p{
+            display: flex;
+            justify-content: flex-start;
+            flex-direction: column;
+        }
+
+        .page section article .content-box p input {
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+            margin: 5px;
+            height: 20px;
+            width: 75%;
+        }
+
+        .page section article .content-box .content-button {
+            align-self: center;
+            height: 50px;
+            width: 75px;
+            color: white;
+            background-color: #2fd015;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+            transition: background-color 0.5s;
+            border: 0;
+            font-family: "Bookman Old Style", "S", serif;
+            font-size: 14px;
+        }
+
+        .page section article .content-box #meal_button:hover {
+            background-color: #348022;
         }
 
         /** ASIDE MENU SECTION **/
@@ -104,7 +158,7 @@
             display: flex;
             flex-wrap: wrap;
             flex-grow: 1;
-            align-content: center;
+            align-content: flex-start;
             justify-content: center;
         }
 
@@ -124,7 +178,7 @@
             align-items: center;
             justify-content: center;
             height: 50px;
-            background: #08621d;
+            background: #348022;
             color: white;
         }
 
@@ -135,6 +189,16 @@
             .page section {
                 flex-direction: column;
             }
+
+            .page section article .content-box {
+                flex-grow: 1;
+                width: 100%;
+            }
+
+            .page section article .content-box p input  {
+                width: auto;
+            }
+
             .page section nav {
                 order: 0;
                 padding-left: 0;
@@ -149,7 +213,7 @@
                 display: inline;
             }
             #menu ul li {
-                 margin-bottom: 0;
+                margin-bottom: 0;
              }
         }
     </style>
@@ -169,26 +233,33 @@
                 <li>Nastavení</li>
             </ul>
         </nav>
-        <main>
+        <article>
             <h2>Kalkulátor denního kalorického příjmu</h2>
-            <p>Co jsi měl dnes k jídlu ?</p>
+            <p>Poznač si co jsi měl dnes k jídlu.</p>
+            <div class="content-box">
+                <h4>Dnes jsem snědl ...</h4>
+                <p>
+                    <label for="meal-name-input">Název jídla: </label><input type="text" id="meal-name-input">
+                    <label for="meal-calories-input">Počet kalorií na 100g [kcal]: </label><input type="text" id="meal-calories-input">
+                    <label for="meal-weight-input">Množství [g]: </label><input type="text" id="meal-weight-input">
+                    <input class="content-button" id="meal_button" type="button" value="Uložit">
+                </p>
 
-        </main>
+            </div>
+        </article>
         <aside>
             <h4> Oblíbená jídla</h4>
             <div class="aside_images">
-                <img src="http://satyr.io/100x100/white" width="100" height="100">
-                <img src="http://satyr.io/100x100/white" width="100" height="100">
-                <img src="http://satyr.io/100x100/white" width="100" height="100">
-                <img src="http://satyr.io/100x100/white" width="100" height="100">
-                <img src="http://satyr.io/100x100/white" width="100" height="100">
-                <img src="http://satyr.io/100x100/white" width="100" height="100">
-                <img src="http://satyr.io/100x100/white" width="100" height="100">
-                <img src="http://satyr.io/100x100/white" width="100" height="100">
-                <img src="http://satyr.io/100x100/white" width="100" height="100">
-                <img src="http://satyr.io/100x100/white" width="100" height="100">
-                <img src="http://satyr.io/100x100/white" width="100" height="100">
-                <img src="http://satyr.io/100x100/white" width="100" height="100">
+                <img src="http://satyr.io/100x100/white" alt="food" width="100" height="100">
+                <img src="http://satyr.io/100x100/white" alt="food" width="100" height="100">
+                <img src="http://satyr.io/100x100/white" alt="food" width="100" height="100">
+                <img src="http://satyr.io/100x100/white" alt="food" width="100" height="100">
+                <img src="http://satyr.io/100x100/white" alt="food" width="100" height="100">
+                <img src="http://satyr.io/100x100/white" alt="food" width="100" height="100">
+                <img src="http://satyr.io/100x100/white" alt="food" width="100" height="100">
+                <img src="http://satyr.io/100x100/white" alt="food" width="100" height="100">
+                <img src="http://satyr.io/100x100/white" alt="food" width="100" height="100">
+                <img src="http://satyr.io/100x100/white" alt="food" width="100" height="100">
             </div>
         </aside>
     </section>
