@@ -1,7 +1,8 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kalkulačka kalorií</title>
 
     <style>
@@ -72,6 +73,13 @@
             background: #348022;
         }
 
+        #menu-control-input {
+            display: none;
+        }
+        #menu-control {
+            display: none;
+        }
+
         /*#menu ul :nth-child(2n+1):hover + li {*/
         /*    background-color: #256e2f;*/
         /*}*/
@@ -97,6 +105,7 @@
             flex-direction: column;
             box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
             background-color: #e6f0ed;
+            margin-bottom: 50px;
         }
 
         .page section article .content-box h4{
@@ -119,7 +128,7 @@
         .page section article .content-box p input {
             box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
             margin: 5px;
-            height: 20px;
+            height: 25px;
             width: 75%;
         }
 
@@ -136,8 +145,15 @@
             font-size: 14px;
         }
 
-        .page section article .content-box #meal_button:hover {
+        .page section article .content-box .content-button:hover {
             background-color: #348022;
+        }
+
+        .page section article .content-box #meals {
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+            margin: 10px;
+            font-family: "Bookman Old Style", "S", serif;
+            resize: none;
         }
 
         /** ASIDE MENU SECTION **/
@@ -185,7 +201,7 @@
 
         /** MOBILE / TABLET SECTION **/
 
-        @media all and (max-width: 768px) {
+        @media only screen and (max-width: 768px) {
             .page section {
                 flex-direction: column;
             }
@@ -201,7 +217,7 @@
 
             .page section nav {
                 order: 0;
-                padding-left: 0;
+                padding: 0;
             }
             .page section main {
                 order: 1;
@@ -212,10 +228,35 @@
             #menu {
                 display: inline;
             }
+            .main_menu {
+                display: none;
+            }
             #menu ul li {
-                margin-bottom: 0;
+                margin: 0 ;
              }
+
+            #menu-control {
+                width: 100%;
+                display: flex;
+                align-content: center;
+                justify-content: center;
+                visibility: visible;
+                color: white;
+                background-color:#348022;
+                padding-top: 20px;
+                padding-bottom: 20px;
+                transition: background-color 0.5s;
+            }
+
+            #menu-control:hover {
+                background-color: #2fd015;
+            }
+
+            #menu-control-input:checked + .main_menu {
+                display: inline;
+            }
         }
+
     </style>
 </head>
 <body>
@@ -226,6 +267,7 @@
     </header>
     <section>
         <nav id="menu">
+            <label id="menu-control" for="menu-control-input">Menu</label><input type="checkbox" id="menu-control-input" />
             <ul class="main_menu">
                 <li>Domů</li>
                 <li>Denní příjem</li>
@@ -239,12 +281,17 @@
             <div class="content-box">
                 <h4>Dnes jsem snědl ...</h4>
                 <p>
-                    <label for="meal-name-input">Název jídla: </label><input type="text" id="meal-name-input">
-                    <label for="meal-calories-input">Počet kalorií na 100g [kcal]: </label><input type="text" id="meal-calories-input">
-                    <label for="meal-weight-input">Množství [g]: </label><input type="text" id="meal-weight-input">
-                    <input class="content-button" id="meal_button" type="button" value="Uložit">
+                    <label for="meal-name-input">Název jídla: </label><input type="text" id="meal-name-input" placeholder="Zde zadejte název jídla">
+                    <label for="meal-calories-input">Počet kalorií na 100g [kcal]: </label><input type="number" id="meal-calories-input" placeholder="Zde zadejte počet kalorií">
+                    <label for="meal-weight-input">Množství [g]: </label><input type="number" id="meal-weight-input" placeholder="Zde zadejte množství">
+                    <button class="content-button" id="meal_button">Uložit</button>
                 </p>
 
+            </div>
+            <div class="content-box">
+                <h4>Dnešní pokrmy</h4>
+                <textarea id="meals" rows="10" cols="40" placeholder="Dnešní pokrmy" readonly></textarea>
+                <label id="income">Dnešní příjem činí: 0 [kcal].</label>
             </div>
         </article>
         <aside>
@@ -267,6 +314,22 @@
         Created by Adam Forgáč | 2020 | CTU FEL Prague
     </footer>
 </div>
+<script>
+    const meal_button = document.getElementById("meal_button");
+    let calories_income = 0.0;
 
+    meal_button.addEventListener("click", function (e) {
+        e.preventDefault();
+        document.getElementById("meals").value += document.getElementById("meal-name-input").value + " s kaloriemi "
+            +document.getElementById("meal-calories-input").value +" [kcal/100g]. V množství "+
+            document.getElementById("meal-weight-input").value  +" g." + '\r';
+        calories_income += document.getElementById("meal-calories-input").value * document.getElementById("meal-weight-input").value / 100;
+        document.getElementById("meal-name-input").value = "";
+        document.getElementById("meal-calories-input").value = "";
+        document.getElementById("meal-weight-input").value = "";
+        document.getElementById("income").innerText = "Dnešní příjem činí "+ calories_income + "[kcal].";
+    });
+
+</script>
 </body>
 </html>
