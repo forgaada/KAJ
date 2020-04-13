@@ -125,6 +125,10 @@
             flex-direction: column;
         }
 
+        .page section article .content-box label{
+            margin: 5px;
+        }
+
         .page section article .content-box p input {
             box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
             margin: 5px;
@@ -143,6 +147,7 @@
             border: 0;
             font-family: "Bookman Old Style", "S", serif;
             font-size: 14px;
+            margin: 1em;
         }
 
         .page section article .content-box .content-button:hover {
@@ -155,6 +160,18 @@
             font-family: "Bookman Old Style", "S", serif;
             resize: none;
         }
+
+        .page section article .content_inline {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-around;
+        }
+
+
+        /*.checkboxes {*/
+        /*    justify-self: flex-start;*/
+        /*    width: 20px;*/
+        /*}*/
 
         /** ASIDE MENU SECTION **/
 
@@ -277,9 +294,58 @@
         </nav>
         <article>
             <h2>Kalkulátor denního kalorického příjmu</h2>
-            <p>Poznač si co jsi měl dnes k jídlu.</p>
+            <p>Spočítej si svůj doporučený kalorický příjem a poznač si co jsi měl dnes k jídlu.</p>
             <div class="content-box">
-                <h4>Dnes jsem snědl ...</h4>
+                <h4>Výpočet bazálního metabolismu</h4>
+                <p>
+                    <label for="weight-input">Vaše tělesná hmotnost v [kg]: </label><input type="number" id="weight-input" placeholder="Hmotnost">
+                    <label for="height-input">Vaše výška v [cm]: </label><input type="number" id="height-input" placeholder="Výška">
+                    <label for="age-input">Váš věk: </label><input type="number" id="age-input" placeholder="Věk">
+                </p>
+                <p> Pohlaví:</p>
+                <div class="content_inline">
+                    <label>
+                        <input class="sex" type="radio" id="sex_male" name="sex" value="male" checked> Muž
+                    </label>
+                    <label>
+                        <input class="sex" type="radio" id="sex_female" name="sex" value="female"> Žena
+                    </label>
+                </div>
+                <p> Aktivita: </p>
+                    <label>
+                        <input class="activity" type="radio" id="activity_1" name="activity" value="1.2" checked> Sedavé zaměst. + žádný trénink
+                    </label>
+                    <label>
+                        <input class="activity" type="radio" id="activity_2" name="activity" value="1.4" checked> Sedavé zaměst. + trénink vyšší intenzity
+                    </label>
+                    <label>
+                        <input class="activity" type="radio" id="activity_3" name="activity" value="1.6" checked> Sedavé zaměst. + trénink 3x- 4x týdně
+                    </label>
+                    <label>
+                        <input class="activity" type="radio" id="activity_4" name="activity" value="1.8" checked> Sedavé zaměst. + trénink 6x týdně
+                    </label>
+                    <label>
+                        <input class="activity" type="radio" id="activity_5" name="activity" value="2.0" checked> Manuální těžké zaměst. + trénink 3x – 4x týdně
+                    </label>
+                    <label>
+                        <input class="activity" type="radio" id="activity_6" name="activity" value="2.2" checked> Manuální těžké zaměst. + trénink 6x týdně
+                    </label>
+                <p> Cíl: </p>
+                <div class="content_inline">
+                    <label>
+                        <input class="goal" type="radio" id="goal_1" name="goal" value="0.8" checked> Hubnutí
+                    </label>
+                    <label>
+                        <input class="goal" type="radio" id="goal_2" name="goal" value="1"> Udržování
+                    </label>
+                    <label>
+                        <input class="goal" type="radio" id="goal_3" name="goal" value="1.2"> Nabírání
+                    </label>
+                </div>
+                <button class="content-button" id="basal_button">Vypočítat</button>
+            </div>
+            <div class="content-box">
+                <h4> Dnes jsem snědl ... </h4>
                 <p>
                     <label for="meal-name-input">Název jídla: </label><input type="text" id="meal-name-input" placeholder="Zde zadejte název jídla">
                     <label for="meal-calories-input">Počet kalorií na 100g [kcal]: </label><input type="number" id="meal-calories-input" placeholder="Zde zadejte počet kalorií">
@@ -292,6 +358,7 @@
                 <h4>Dnešní pokrmy</h4>
                 <textarea id="meals" rows="10" cols="40" placeholder="Dnešní pokrmy" readonly></textarea>
                 <label id="income">Dnešní příjem činí: 0 [kcal].</label>
+                <label id="basal">Váš cílový kalorcký příjem: 0 [kcal].</label>
             </div>
         </article>
         <aside>
@@ -316,7 +383,19 @@
 </div>
 <script>
     const meal_button = document.getElementById("meal_button");
+    const basal_button = document.getElementById("basal_button");
     let calories_income = 0.0;
+    let basal = 0.0;
+
+    function calculateBasal (weight, height, age, sex, activity, goal) {
+        let newBasal = 0;
+        if (sex === "female") {
+            newBasal = 655.0955 + (9.5634 * weight) + (1.8496* height) - (4.6756 * age);
+        } else if (sex ==="male") {
+            newBasal = 66.473 + (13.7516 * weight) + (5.0033 * height) - (6.755 * age);
+        }
+        return newBasal* activity * goal;
+    }
 
     meal_button.addEventListener("click", function (e) {
         e.preventDefault();
@@ -329,6 +408,20 @@
         document.getElementById("meal-weight-input").value = "";
         document.getElementById("income").innerText = "Dnešní příjem činí "+ calories_income + "[kcal].";
     });
+
+    basal_button.addEventListener("click", function (e) {
+        e.preventDefault();
+        basal = calculateBasal(
+            document.getElementById("weight-input").value,
+            document.getElementById("height-input").value,
+            document.getElementById("age-input").value,
+            document.querySelector('.sex:checked').value,
+            document.querySelector('.activity:checked').value,
+            document.querySelector('.goal:checked').value
+        );
+        document.getElementById("basal").innerText = "Váš cílový kalorcký příjem:  "+ basal + " [kcal].";
+
+    })
 
 </script>
 </body>
