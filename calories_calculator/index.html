@@ -167,6 +167,31 @@
             justify-content: space-around;
         }
 
+        /*PROGRESS BAR*/
+
+        .slider_bar{
+            align-self: center;
+            width:75%;
+            height:15px;
+            margin: 1em;
+            border:1px solid #000;
+            overflow:hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+        }
+        .slider_left{
+            width:50%;
+            height:15px;
+            border-right: 1px solid #000000;
+            background: #d65946;
+        }
+        .slider_right {
+            color: #000000;
+            left: 25px;
+            position: relative;
+            top: -16px;
+        }
+
+
 
         /*.checkboxes {*/
         /*    justify-self: flex-start;*/
@@ -296,6 +321,15 @@
             <h2>Kalkulátor denního kalorického příjmu</h2>
             <p>Spočítej si svůj doporučený kalorický příjem a poznač si co jsi měl dnes k jídlu.</p>
             <div class="content-box">
+                <h4>Denní stav</h4>
+                <p>Stav denního příjmu kalorií:</p>
+                <div class="slider_bar">
+                    <div class="slider_left" id="calories_bar"></div>
+                    <div class="slider_right"></div>
+                </div>
+
+            </div>
+            <div class="content-box">
                 <h4>Výpočet bazálního metabolismu</h4>
                 <p>
                     <label for="weight-input">Vaše tělesná hmotnost v [kg]: </label><input type="number" id="weight-input" placeholder="Hmotnost">
@@ -357,8 +391,8 @@
             <div class="content-box">
                 <h4>Dnešní pokrmy</h4>
                 <textarea id="meals" rows="10" cols="40" placeholder="Dnešní pokrmy" readonly></textarea>
-                <label id="income">Dnešní příjem činí: 0 [kcal].</label>
-                <label id="basal">Váš cílový kalorcký příjem: 0 [kcal].</label>
+                <label id="income">Dnešní příjem činí: [kcal].</label>
+                <label id="basal">Váš cílový kalorcký příjem: [kcal].</label>
             </div>
         </article>
         <aside>
@@ -386,15 +420,51 @@
     const basal_button = document.getElementById("basal_button");
     let calories_income = 0.0;
     let basal = 0.0;
+    let stats;
 
-    function calculateBasal (weight, height, age, sex, activity, goal) {
-        let newBasal = 0;
-        if (sex === "female") {
-            newBasal = 655.0955 + (9.5634 * weight) + (1.8496* height) - (4.6756 * age);
-        } else if (sex ==="male") {
-            newBasal = 66.473 + (13.7516 * weight) + (5.0033 * height) - (6.755 * age);
+    function update_bar(maxValue, actualValue, barId){
+        let width =Math.round((actualValue/maxValue)*100);
+        document.getElementById(barId).style.width= width+'%';
+    }
+
+
+    function loadData() {
+        basal = (localStorage.getItem('basal'));
+        calories_income = localStorage.getItem('calories_income');
+
+        // if (basal !== null && calories_income !== null) {
+            update_bar(basal,calories_income,"calories_bar");
+        // }
+        // if (calories_income !== null) {document.getElementById("income").innerText = "Dnešní příjem činí "+ calories_income.toFixed() + "[kcal]."}
+    }
+
+    window.onload = loadData;
+
+    class Stats {
+        constructor(weight, height, age, sex, activity, goal) {
+            this._weight = weight;
+            this._height = height;
+            this._age = age;
+            this._sex = sex;
+            this._activity = activity;
+            this._goal = goal;
+            this._basal = 0.0;
         }
-        return newBasal* activity * goal;
+
+        calculateBasal () {
+            let newBasal = 0.0;
+            if (this._sex === "female") {
+                newBasal = 655.0955 + (9.5634 * this._weight) + (1.8496* this._height) - (4.6756 * this._age);
+            } else if (this._sex ==="male") {
+                newBasal = 66.473 + (13.7516 * this._weight) + (5.0033 * this._height) - (6.755 * this._age);
+            }
+            this._basal = newBasal* this._activity * this._goal;
+        }
+
+
+        get basal() {
+            return this._basal;
+        }
     }
 
     meal_button.addEventListener("click", function (e) {
@@ -406,12 +476,13 @@
         document.getElementById("meal-name-input").value = "";
         document.getElementById("meal-calories-input").value = "";
         document.getElementById("meal-weight-input").value = "";
-        document.getElementById("income").innerText = "Dnešní příjem činí "+ calories_income + "[kcal].";
+        localStorage.setItem('calories',calories_income);
+        document.getElementById("income").innerText = "Dnešní příjem činí "+ calories_income.toFixed() + "[kcal].";
     });
 
     basal_button.addEventListener("click", function (e) {
         e.preventDefault();
-        basal = calculateBasal(
+        stats = new Stats(
             document.getElementById("weight-input").value,
             document.getElementById("height-input").value,
             document.getElementById("age-input").value,
@@ -419,7 +490,9 @@
             document.querySelector('.activity:checked').value,
             document.querySelector('.goal:checked').value
         );
-        document.getElementById("basal").innerText = "Váš cílový kalorcký příjem:  "+ basal + " [kcal].";
+        stats.calculateBasal();
+        localStorage.setItem('basal',stats.basal);
+        document.getElementById("basal").innerText = "Váš cílový kalorcký příjem:  "+ stats.basal.toFixed(0) + " [kcal].";
 
     })
 
