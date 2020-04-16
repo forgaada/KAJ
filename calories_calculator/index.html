@@ -26,6 +26,7 @@
             height: 100px;
             background: #348022;
             color: white;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
         }
         .page section {
             display: flex;
@@ -71,6 +72,7 @@
 
         #menu ul li:hover {
             background: #348022;
+            transform: translateX(+5%);
         }
 
         #menu-control-input {
@@ -179,8 +181,9 @@
             box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
         }
         .slider_left{
-            width:50%;
-            height:15px;
+            transition: all 1s;
+            width:0;
+            height:25px;
             border-right: 1px solid #000000;
             background: #d65946;
         }
@@ -206,10 +209,12 @@
             align-items: center;
             flex-direction: column;
             background-color: #2fd015;
-            width: 150px;
+            width: 175px;
             margin: 1em;
             box-sizing: border-box;
-            transition: width 1s;
+            transition: all 0.5s ease-in;
+            color: white;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
         }
 
         .page section aside .aside_images {
@@ -277,6 +282,10 @@
                 margin: 0 ;
              }
 
+            #menu ul li:hover {
+                transform: none;
+            }
+
             #menu-control {
                 width: 100%;
                 display: flex;
@@ -322,11 +331,12 @@
             <p>Spočítej si svůj doporučený kalorický příjem a poznač si co jsi měl dnes k jídlu.</p>
             <div class="content-box">
                 <h4>Denní stav</h4>
-                <p>Stav denního příjmu kalorií:</p>
+                <p>Stav naplnění denního příjmu kalorií:</p>
                 <div class="slider_bar">
                     <div class="slider_left" id="calories_bar"></div>
                     <div class="slider_right"></div>
                 </div>
+                <button class="content-button" id="state_button">Načíst</button>
 
             </div>
             <div class="content-box">
@@ -418,27 +428,42 @@
 <script>
     const meal_button = document.getElementById("meal_button");
     const basal_button = document.getElementById("basal_button");
+    const state_button = document.getElementById("state_button");
     let calories_income = 0.0;
     let basal = 0.0;
     let stats;
 
     function update_bar(maxValue, actualValue, barId){
+        if (maxValue === 0) {
+            document.getElementById(barId).innerText = 'Nespecifikováno';
+            return;
+        }
         let width =Math.round((actualValue/maxValue)*100);
         document.getElementById(barId).style.width= width+'%';
+        document.getElementById(barId).innerText = width+'%';
     }
 
 
     function loadData() {
-        basal = (localStorage.getItem('basal'));
-        calories_income = localStorage.getItem('calories_income');
-
-        // if (basal !== null && calories_income !== null) {
-            update_bar(basal,calories_income,"calories_bar");
+        // basal = (localStorage.getItem('basal'));
+        // calories_income = localStorage.getItem('calories');
+        // if (basal === null) {
+        //     basal = 0;
         // }
-        // if (calories_income !== null) {document.getElementById("income").innerText = "Dnešní příjem činí "+ calories_income.toFixed() + "[kcal]."}
+        // if (calories_income === null) {
+        //     calories_income = 0;
+        // }
+        update_bar(basal,calories_income,"calories_bar");
     }
 
-    window.onload = loadData;
+
+    // function annulCalories() {
+        // stats.basal = 0.0;
+        // basal = 0.0;
+        // calories_income = 0;
+    //     localStorage.setItem('basal', null);
+    //     localStorage.setItem('calories', null);
+    // }
 
     class Stats {
         constructor(weight, height, age, sex, activity, goal) {
@@ -476,8 +501,8 @@
         document.getElementById("meal-name-input").value = "";
         document.getElementById("meal-calories-input").value = "";
         document.getElementById("meal-weight-input").value = "";
-        localStorage.setItem('calories',calories_income);
-        document.getElementById("income").innerText = "Dnešní příjem činí "+ calories_income.toFixed() + "[kcal].";
+        // localStorage.setItem('calories',calories_income);
+        document.getElementById("income").innerText = "Dnešní příjem činí "+ calories_income.toFixed(0) + "[kcal].";
     });
 
     basal_button.addEventListener("click", function (e) {
@@ -491,10 +516,18 @@
             document.querySelector('.goal:checked').value
         );
         stats.calculateBasal();
-        localStorage.setItem('basal',stats.basal);
+        basal = stats.basal;
+        // localStorage.setItem('basal',stats.basal);
         document.getElementById("basal").innerText = "Váš cílový kalorcký příjem:  "+ stats.basal.toFixed(0) + " [kcal].";
 
-    })
+    });
+
+    state_button.addEventListener("click", function (e) {
+        e.preventDefault();
+        loadData();
+    });
+
+
 
 </script>
 </body>
