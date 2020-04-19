@@ -52,25 +52,26 @@
         }
 
         #menu ul li {
-            display: block;
+
+        }
+
+        #menu ul li a {
+            text-decoration: none;
             color: white;
+            display: block;
             align-content: center;
+            text-align: center;
             padding: 20px 30px;
             margin: 5px;
             background-color: #2fd015;
             transition: all 0.5s;
             box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
         }
-
-        #menu ul li a {
-            text-decoration: none;
-            color: white;
-        }
         #menu ul li a:visited { text-decoration: none;}
         #menu ul li a:hover { text-decoration: none;}
         #menu ul li a:focus { text-decoration: none;}
 
-        #menu ul li:hover {
+        #menu ul li a:hover {
             background: #348022;
             transform: translateX(+5%);
         }
@@ -119,6 +120,7 @@
             display: flex;
             justify-content: center;
             align-content: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
         }
 
         .page section article .content-box p{
@@ -194,12 +196,17 @@
             top: -16px;
         }
 
+        .page section article .home-boxes {
+            display: none;
+        }
 
+        .page section article .meals-boxes {
+            display: none;
+        }
 
-        /*.checkboxes {*/
-        /*    justify-self: flex-start;*/
-        /*    width: 20px;*/
-        /*}*/
+        .page section article .settings-boxes {
+            display: none;
+        }
 
         /** ASIDE MENU SECTION **/
 
@@ -278,11 +285,11 @@
             .main_menu {
                 display: none;
             }
-            #menu ul li {
+            #menu ul li a{
                 margin: 0 ;
              }
 
-            #menu ul li:hover {
+            #menu ul li a:hover {
                 transform: none;
             }
 
@@ -320,16 +327,15 @@
         <nav id="menu">
             <label id="menu-control" for="menu-control-input">Menu</label><input type="checkbox" id="menu-control-input" />
             <ul class="main_menu">
-                <li>Domů</li>
-                <li>Denní příjem</li>
-                <li>Potraviny</li>
-                <li>Nastavení</li>
+                <li><a href="home">Domů</a></li>
+                <li><a href="meals">Potraviny</a></li>
+                <li><a href="settings">Nastavení</a></li>
             </ul>
         </nav>
-        <article>
-            <h2>Kalkulátor denního kalorického příjmu</h2>
-            <p>Spočítej si svůj doporučený kalorický příjem a poznač si co jsi měl dnes k jídlu.</p>
-            <div class="content-box">
+        <article id= "main">
+            <h2 id="article-heading"></h2>
+            <p id="article-content"></p>
+            <div class="content-box home-boxes">
                 <h4>Denní stav</h4>
                 <p>Stav naplnění denního příjmu kalorií:</p>
                 <div class="slider_bar">
@@ -339,7 +345,7 @@
                 <button class="content-button" id="state_button">Načíst</button>
 
             </div>
-            <div class="content-box">
+            <div class="content-box settings-boxes">
                 <h4>Výpočet bazálního metabolismu</h4>
                 <p>
                     <label for="weight-input">Vaše tělesná hmotnost v [kg]: </label><input type="number" id="weight-input" placeholder="Hmotnost">
@@ -388,7 +394,7 @@
                 </div>
                 <button class="content-button" id="basal_button">Vypočítat</button>
             </div>
-            <div class="content-box">
+            <div class="content-box home-boxes">
                 <h4> Dnes jsem snědl ... </h4>
                 <p>
                     <label for="meal-name-input">Název jídla: </label><input type="text" id="meal-name-input" placeholder="Zde zadejte název jídla">
@@ -398,7 +404,7 @@
                 </p>
 
             </div>
-            <div class="content-box">
+            <div class="content-box home-boxes">
                 <h4>Dnešní pokrmy</h4>
                 <textarea id="meals" rows="10" cols="40" placeholder="Dnešní pokrmy" readonly></textarea>
                 <label id="income">Dnešní příjem činí: [kcal].</label>
@@ -433,6 +439,69 @@
     let basal = 0.0;
     let stats;
 
+    window.onload = loadHomePage;
+
+    function loadHomePage() {
+        clearContentBoxes();
+        loadContentBoxes("home-boxes");
+        updateArticle("Kalkulátor denního kalorického příjmu",
+            "Poznač si co jsi měl dnes k jídlu. ");
+    }
+
+    function loadMealsPage() {
+        clearContentBoxes();
+        loadContentBoxes("meals-boxes");
+        updateArticle("Potraviny",
+            "V této sekci nalezneš přehled již uložených potravin.");
+    }
+
+    function loadSettingsPage() {
+        clearContentBoxes();
+        loadContentBoxes("settings-boxes");
+        updateArticle("Nastavení kalorického příjmu",
+            "Vyplň tabulku pro výpočet bazálního metabolismu pro zjištění doporučeného denního kalorického příjmu.");
+    }
+
+        for (let element of document.getElementsByTagName("a")){
+            element.addEventListener("click", function(e) {
+                e.preventDefault();
+                if(e.target && e.target.nodeName === "A") {
+                    switch (e.target.innerText) {
+                        case "Domů": {
+                            loadHomePage();
+                            break;
+                        }
+                        case "Potraviny": {
+                            loadMealsPage();
+                            break;
+                        }
+                        case "Nastavení": {
+                            loadSettingsPage();
+                            break;
+                        }
+                        default :
+                    }
+                }
+            });
+        }
+
+    function clearContentBoxes() {
+        for (let element of document.getElementsByClassName("content-box")) {
+            element.style.display = "none";
+        }
+    }
+
+    function loadContentBoxes(className) {
+        for (let element of document.getElementsByClassName(className)) {
+            element.style.display = "flex";
+        }
+    }
+
+    function updateArticle(heading, content) {
+        document.getElementById("article-heading").innerText = heading;
+        document.getElementById("article-content").innerText = content;
+    }
+
     function update_bar(maxValue, actualValue, barId){
         if (maxValue === 0) {
             document.getElementById(barId).innerText = 'Nespecifikováno';
@@ -445,25 +514,62 @@
 
 
     function loadData() {
-        // basal = (localStorage.getItem('basal'));
-        // calories_income = localStorage.getItem('calories');
-        // if (basal === null) {
-        //     basal = 0;
-        // }
-        // if (calories_income === null) {
-        //     calories_income = 0;
-        // }
         update_bar(basal,calories_income,"calories_bar");
     }
 
+    function getId () {
+        return '_' + Math.random().toString(36).substr(2, 9);
+    }
 
-    // function annulCalories() {
-        // stats.basal = 0.0;
-        // basal = 0.0;
-        // calories_income = 0;
-    //     localStorage.setItem('basal', null);
-    //     localStorage.setItem('calories', null);
-    // }
+    class Meal {
+        constructor(name, calories, weight) {
+            this._name = name;
+            this._calories = calories;
+            this._weight = weight;
+            this._id = "meal_"+getId();
+        }
+
+        get name() {return this._name;}
+
+        get calories() {return this._calories;}
+
+        get weight() {return this._weight;}
+
+        get id() {return this._id;}
+
+        renderMeal () {
+            let createdElement = document.createElement("div");
+            createdElement.id = this.id;
+            createdElement.classList.add("content-box");
+
+            let createdHeader = document.createElement("h4");
+            createdHeader.innerText = this.name;
+            createdElement.appendChild(createdHeader);
+
+            let createdP = document.createElement("p");
+            createdElement.appendChild(createdP);
+
+            let createdImage = document.createElement("img");
+            createdImage.src = "http://satyr.io/100x100/white";
+            createdImage.alt = "food";
+            createdImage.width = 100;
+            createdImage.height = 100;
+            createdImage.style.alignSelf = "center";
+            createdP.appendChild(createdImage);
+
+            let createdLabel1 = document.createElement("label");
+            createdLabel1.innerText = "Calories: "+this.calories+" Weight: "+this.weight;
+            createdP.appendChild(createdLabel1);
+
+            let createdButton = document.createElement("button");
+            createdButton.id = "button_"+getId();
+            createdButton.innerText = "Smazat";
+            createdButton.classList.add("content-button");
+            createdP.appendChild(createdButton);
+
+            document.querySelector("#main").appendChild(createdElement);
+        }
+    }
 
     class Stats {
         constructor(weight, height, age, sex, activity, goal) {
@@ -474,6 +580,7 @@
             this._activity = activity;
             this._goal = goal;
             this._basal = 0.0;
+            this._meals = [];
         }
 
         calculateBasal () {
@@ -494,15 +601,18 @@
 
     meal_button.addEventListener("click", function (e) {
         e.preventDefault();
-        document.getElementById("meals").value += document.getElementById("meal-name-input").value + " s kaloriemi "
-            +document.getElementById("meal-calories-input").value +" [kcal/100g]. V množství "+
-            document.getElementById("meal-weight-input").value  +" g." + '\r';
-        calories_income += document.getElementById("meal-calories-input").value * document.getElementById("meal-weight-input").value / 100;
+        let newMeal = new Meal(document.getElementById("meal-name-input").value, document.getElementById("meal-calories-input").value,
+            document.getElementById("meal-weight-input").value);
+        document.getElementById("meals").value += newMeal.name + " s kaloriemi "
+            + newMeal.calories +" [kcal/100g]. V množství "+
+             newMeal.weight +" g." + '\r';
+        calories_income += newMeal.calories * newMeal.weight / 100;
         document.getElementById("meal-name-input").value = "";
         document.getElementById("meal-calories-input").value = "";
         document.getElementById("meal-weight-input").value = "";
         // localStorage.setItem('calories',calories_income);
         document.getElementById("income").innerText = "Dnešní příjem činí "+ calories_income.toFixed(0) + "[kcal].";
+        // newMeal.renderMeal();
     });
 
     basal_button.addEventListener("click", function (e) {
