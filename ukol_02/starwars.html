@@ -47,26 +47,26 @@
 
         // TASK 1 + 2 : Function uses XMLHttpRequest to create HTTP request and exposes Promises interface
 
-                // function myRequest(url) {
-                //     return new Promise((resolve, reject) => {
-                //         const xhr = new XMLHttpRequest();
-                //         xhr.open('GET', url);
-                //
-                //         xhr.onload = function() {
-                //             if (xhr.readyState === 4 && xhr.status === 200) {
-                //                 const parsedJSONObject = JSON.parse(xhr.responseText);
-                //                 resolve(parsedJSONObject);
-                //             }
-                //             else {
-                //                 reject(Error(xhr.statusText));
-                //             }
-                //         };
-                //         xhr.onerror = function() {
-                //             reject(Error("Network Error"));
-                //         };
-                //         xhr.send();
-                //     });
-                // }
+                function myRequest(url) {
+                    return new Promise((resolve, reject) => {
+                        const xhr = new XMLHttpRequest();
+                        xhr.open('GET', url);
+
+                        xhr.onload = function() {
+                            if (xhr.readyState === 4 && xhr.status === 200) {
+                                const parsedJSONObject = JSON.parse(xhr.responseText);
+                                resolve(parsedJSONObject);
+                            }
+                            else {
+                                reject(Error(xhr.statusText));
+                            }
+                        };
+                        xhr.onerror = function() {
+                            reject(Error("Network Error"));
+                        };
+                        xhr.send();
+                    });
+                }
 
         //TASK 3 + 4: browser's fetch API and async/await used for interaction with myRequest and fetch
 

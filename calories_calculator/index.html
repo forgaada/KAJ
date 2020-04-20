@@ -56,6 +56,7 @@
         }
 
         #menu ul li a {
+            width: auto;
             text-decoration: none;
             color: white;
             display: block;
@@ -81,6 +82,40 @@
         }
         #menu-control {
             display: none;
+        }
+
+        .page section nav .user-box {
+            display: flex;
+            width: 150px;
+            margin: 5px;
+            justify-content: center;
+            align-content: start;
+            flex-direction: column;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+            background-color: #e6f0ed;
+        }
+
+        .page section nav .user-box img{
+            align-self: center;
+        }
+
+        .page section nav .user-box h4{
+            margin-top: 0;
+            background-color: #348022;
+            padding-top: 1em;
+            height: 40px;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-content: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+        }
+
+        .page section nav .user-box p{
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 75ch;
         }
 
         /*#menu ul :nth-child(2n+1):hover + li {*/
@@ -273,6 +308,11 @@
                 order: 0;
                 padding: 0;
             }
+
+            .page section nav .user-box {
+                display: none;
+            }
+
             .page section main {
                 order: 1;
             }
@@ -331,6 +371,11 @@
                 <li><a href="meals">Potraviny</a></li>
                 <li><a href="settings">Nastavení</a></li>
             </ul>
+            <div class="user-box">
+                <h4>Uživatel</h4>
+                <img src="http://satyr.io/100x100/white" alt="food" width="100" height="100">
+                <p>Zde naleznete informace o uživateli</p>
+            </div>
         </nav>
         <article id= "main">
             <h2 id="article-heading"></h2>
@@ -344,6 +389,15 @@
                 </div>
                 <button class="content-button" id="state_button">Načíst</button>
 
+            </div>
+            <div class="content-box meals-boxes">
+                <h4>Hledej jídlo</h4>
+                <p>Zde můžeš najít jídlo včetně obsahu kalorií (ze serveru Nutritionix) - hledat je možné jednoslovné klíče
+                    v anglickém jazyce. Pokud vyhledávání nefunguje, zkontrulujte připojení k internetu!</p>
+                <label for="find-meal-input">Název jídla: </label><input type="text" id="find-meal-input" placeholder="Nachos">
+                <button class="content-button" id="find-meal-button">Hledej</button>
+                <p id="find-meal-content">Popis jídla: </p>
+                <p id="find-meal-calories">Počet kalorií (na 1 porci): </p>
             </div>
             <div class="content-box settings-boxes">
                 <h4>Výpočet bazálního metabolismu</h4>
@@ -435,6 +489,7 @@
     const meal_button = document.getElementById("meal_button");
     const basal_button = document.getElementById("basal_button");
     const state_button = document.getElementById("state_button");
+    const find_meal_button = document.getElementById("find-meal-button");
     let calories_income = 0.0;
     let basal = 0.0;
     let stats;
@@ -452,7 +507,7 @@
         clearContentBoxes();
         loadContentBoxes("meals-boxes");
         updateArticle("Potraviny",
-            "V této sekci nalezneš přehled již uložených potravin.");
+            "V této sekci nalezneš přehled již uložených potravin. Můžeš také hledat potreviny online.");
     }
 
     function loadSettingsPage() {
@@ -637,7 +692,59 @@
         loadData();
     });
 
+    find_meal_button.addEventListener("click", function (e) {
+        e.preventDefault();
+        getFoodByName(document.getElementById("find-meal-input").value,"find-meal-content","find-meal-calories");
+        document.getElementById("find-meal-input").innerText = "";
+    });
 
+
+    //FETCHING DATA FROM Nutrition-ix BY XML-HTTP-REQUEST + PROMISES INTERFACE ( WORKS ONLY WITH INTERNET CONNECTION )
+
+    function getFirstResult(json) {
+        return {
+            calories: json.hits[0].fields.nf_calories,
+            name: json.hits[0].fields.item_name
+        };
+    }
+
+    function getFoodRequest(name) {
+        return new Promise((resolve, reject) => {
+            const xhr = new XMLHttpRequest();
+            xhr.open("GET", "https://nutritionix-api.p.rapidapi.com/v1_1/search/"+name+"?fields=item_name%2Cnf_calories");
+            xhr.setRequestHeader("x-rapidapi-host", "nutritionix-api.p.rapidapi.com");
+            xhr.setRequestHeader("x-rapidapi-key", "62cc3c3be3mshcad3df20843842ap139b49jsndc900c4dfc3f");
+
+            xhr.onload = function() {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    const parsedJSONObject = JSON.parse(xhr.responseText);
+                    resolve(parsedJSONObject);
+                }
+                else {
+                    reject(Error(xhr.statusText));
+                }
+            };
+            xhr.onerror = function() {
+                reject(Error("Network Error"));
+            };
+            xhr.send();
+        });
+    }
+
+    function errorLog(err) {
+        console.log('Error Occurred :', err);
+    }
+
+    async function getFoodByName(name, toWriteContentId, toWriteCaloriesId) {
+        await getFoodRequest(name)
+            .then(response => {
+                document.getElementById(toWriteContentId).innerText = "Popis jídla: "+getFirstResult(response).name;
+                document.getElementById(toWriteCaloriesId).innerText = "Počet kalorií (na 1 porci): " +getFirstResult(response).calories;
+            })
+            .catch(error => {
+                errorLog(error);
+            });
+    }
 
 </script>
 </body>
