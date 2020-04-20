@@ -200,6 +200,13 @@
             resize: none;
         }
 
+        .page section article .label-content {
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+            background-color: white;
+            margin: 5px;
+            padding: 5px;
+        }
+
         .page section article .content_inline {
             display: flex;
             flex-direction: row;
@@ -237,6 +244,14 @@
 
         .page section article .meals-boxes {
             display: none;
+        }
+
+        .page section article .meals-boxes img {
+            border-radius: 10px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+            align-self: center;
+            padding: 5px;
+            background-color: white;
         }
 
         .page section article .settings-boxes {
@@ -373,7 +388,7 @@
             </ul>
             <div class="user-box">
                 <h4>Uživatel</h4>
-                <img src="http://satyr.io/100x100/white" alt="food" width="100" height="100">
+                <img src="http://satyr.io/100x100/white" alt="user-image" width="100" height="100">
                 <p>Zde naleznete informace o uživateli</p>
             </div>
         </nav>
@@ -390,15 +405,19 @@
                 <button class="content-button" id="state_button">Načíst</button>
 
             </div>
+            <!--TODO-->
             <div class="content-box meals-boxes">
                 <h4>Hledej jídlo</h4>
-                <p>Zde můžeš najít jídlo včetně obsahu kalorií (ze serveru Nutritionix) - hledat je možné jednoslovné klíče
-                    v anglickém jazyce. Pokud vyhledávání nefunguje, zkontrulujte připojení k internetu!</p>
-                <label for="find-meal-input">Název jídla: </label><input type="text" id="find-meal-input" placeholder="Nachos">
-                <button class="content-button" id="find-meal-button">Hledej</button>
-                <p id="find-meal-content">Popis jídla: </p>
-                <p id="find-meal-calories">Počet kalorií (na 1 porci): </p>
+                <img src="nutritionix.jpg" alt="nutritionix-image" width="286" height="74">
+                <p>
+                    <label>Zde můžeš najít jídlo včetně obsahu kalorií (ze serveru Nutritionix) - hledat je možné jednoslovné klíče
+                        v anglickém jazyce. Pokud vyhledávání nefunguje, zkontrulujte připojení k internetu!</label>
+                    <label for="find-meal-input">Název jídla: </label><input type="text" id="find-meal-input" placeholder="Nachos">
+                    <button class="content-button" id="find-meal-button">Hledej</button>
+                <p id="find-meal-content-all">Výsledky hledání: </p>
+                </p>
             </div>
+
             <div class="content-box settings-boxes">
                 <h4>Výpočet bazálního metabolismu</h4>
                 <p>
@@ -507,7 +526,7 @@
         clearContentBoxes();
         loadContentBoxes("meals-boxes");
         updateArticle("Potraviny",
-            "V této sekci nalezneš přehled již uložených potravin. Můžeš také hledat potreviny online.");
+            "V této sekci nalezneš přehled již uložených potravin. Můžeš také hledat potraviny online.");
     }
 
     function loadSettingsPage() {
@@ -694,24 +713,34 @@
 
     find_meal_button.addEventListener("click", function (e) {
         e.preventDefault();
-        getFoodByName(document.getElementById("find-meal-input").value,"find-meal-content","find-meal-calories");
+        document.getElementById("find-meal-content-all").innerHTML = 'Výsledky hledání: ';
+        getFoodArrayByName(document.getElementById("find-meal-input").value,"find-meal-content-all");
         document.getElementById("find-meal-input").innerText = "";
     });
 
 
     //FETCHING DATA FROM Nutrition-ix BY XML-HTTP-REQUEST + PROMISES INTERFACE ( WORKS ONLY WITH INTERNET CONNECTION )
 
-    function getFirstResult(json) {
-        return {
-            calories: json.hits[0].fields.nf_calories,
-            name: json.hits[0].fields.item_name
-        };
+    function getFirstTenResults(json) {
+        let elements = [];
+        for (let i = 0; i < 10; i++) {
+            elements.push(
+                {
+                    calories: json.hits[i].fields.nf_calories,
+                    name:  json.hits[i].fields.item_name,
+                    total_fat: json.hits[i].fields.nf_total_fat,
+                    protein: json.hits[i].fields.nf_protein
+                }
+            )
+        }
+        return elements;
     }
 
     function getFoodRequest(name) {
         return new Promise((resolve, reject) => {
             const xhr = new XMLHttpRequest();
-            xhr.open("GET", "https://nutritionix-api.p.rapidapi.com/v1_1/search/"+name+"?fields=item_name%2Cnf_calories");
+            xhr.open("GET", "https://nutritionix-api.p.rapidapi.com/v1_1/search/"+name+"?fields=item_name%2Cnf_calories" +
+                "%2Cnf_protein%2Cnf_total_fat");
             xhr.setRequestHeader("x-rapidapi-host", "nutritionix-api.p.rapidapi.com");
             xhr.setRequestHeader("x-rapidapi-key", "62cc3c3be3mshcad3df20843842ap139b49jsndc900c4dfc3f");
 
@@ -735,16 +764,23 @@
         console.log('Error Occurred :', err);
     }
 
-    async function getFoodByName(name, toWriteContentId, toWriteCaloriesId) {
+    async function getFoodArrayByName(name, toAppendContentId) {
         await getFoodRequest(name)
             .then(response => {
-                document.getElementById(toWriteContentId).innerText = "Popis jídla: "+getFirstResult(response).name;
-                document.getElementById(toWriteCaloriesId).innerText = "Počet kalorií (na 1 porci): " +getFirstResult(response).calories;
+                for (let element of getFirstTenResults(response)) {
+                    let createdElement = document.createElement("label");
+                    createdElement.classList.add("label-content");
+                    createdElement.innerText = "Popis: "+element.name+" [Obsah v 1 porci] - Kalorie: "+ element.calories + "" +
+                        " - Bílkoviny: "+element.protein+ " - Tuky: "+element.total_fat;
+
+                    document.getElementById(toAppendContentId).appendChild(createdElement);
+                }
             })
             .catch(error => {
                 errorLog(error);
             });
     }
+
 
 </script>
 </body>
