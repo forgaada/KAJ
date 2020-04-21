@@ -543,6 +543,7 @@
         for (let element of document.getElementsByTagName("a")){
             element.addEventListener("click", function(e) {
                 e.preventDefault();
+                document.getElementById("menu-control-input").checked = false;
                 if(e.target && e.target.nodeName === "A") {
                     switch (e.target.innerText) {
                         case "Domů": {
