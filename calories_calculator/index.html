@@ -284,6 +284,7 @@
 
         .page section aside .aside_images img {
             margin: 10px;
+            border-radius: 1em;
             box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
         }
 
@@ -388,7 +389,7 @@
             </ul>
             <div class="user-box">
                 <h4>Uživatel</h4>
-                <img src="http://satyr.io/100x100/white" alt="user-image" width="100" height="100">
+                <img src="pictures/user.jpg" alt="user-image" width="100" height="100">
                 <p>Zde naleznete informace o uživateli</p>
             </div>
         </nav>
@@ -407,11 +408,10 @@
             </div>
             <!--TODO-->
             <div class="content-box meals-boxes">
-                <h4>Hledej jídlo</h4>
-                <img src="nutritionix.jpg" alt="nutritionix-image" width="286" height="74">
+                <h4>Hledej jídlo online</h4>
+                <img src="pictures/nutritionix.jpg" alt="nutritionix-image" width="286" height="74">
                 <p>
-                    <label>Zde můžeš najít jídlo včetně obsahu kalorií (ze serveru Nutritionix) - hledat je možné jednoslovné klíče
-                        v anglickém jazyce. Pokud vyhledávání nefunguje, zkontrulujte připojení k internetu!</label>
+                    <label>Najdi jídlo včetně nutričních hodnot na serveru Nutritionix (hledat je možné pouze v anglickém jazyce).</label>
                     <label for="find-meal-input">Název jídla: </label><input type="text" id="find-meal-input" placeholder="Nachos">
                     <button class="content-button" id="find-meal-button">Hledej</button>
                 <p id="find-meal-content-all">Výsledky hledání: </p>
@@ -471,8 +471,8 @@
                 <h4> Dnes jsem snědl ... </h4>
                 <p>
                     <label for="meal-name-input">Název jídla: </label><input type="text" id="meal-name-input" placeholder="Zde zadejte název jídla">
-                    <label for="meal-calories-input">Počet kalorií na 100g [kcal]: </label><input type="number" id="meal-calories-input" placeholder="Zde zadejte počet kalorií">
-                    <label for="meal-weight-input">Množství [g]: </label><input type="number" id="meal-weight-input" placeholder="Zde zadejte množství">
+                    <label for="meal-calories-input">Počet kalorií na 100g/ml [kcal]: </label><input type="number" id="meal-calories-input" placeholder="Zde zadejte počet kalorií">
+                    <label for="meal-weight-input">Množství [g/ml]: </label><input type="number" id="meal-weight-input" placeholder="Zde zadejte množství">
                     <button class="content-button" id="meal_button">Uložit</button>
                 </p>
 
@@ -480,23 +480,21 @@
             <div class="content-box home-boxes">
                 <h4>Dnešní pokrmy</h4>
                 <textarea id="meals" rows="10" cols="40" placeholder="Dnešní pokrmy" readonly></textarea>
-                <label id="income">Dnešní příjem činí: [kcal].</label>
-                <label id="basal">Váš cílový kalorcký příjem: [kcal].</label>
+                <label class="label-content" id="income">Dnešní příjem činí: [kcal].</label>
+                <label class="label-content" id="basal">Váš cílový kalorcký příjem: [kcal].</label>
             </div>
         </article>
         <aside>
             <h4> Oblíbená jídla</h4>
             <div class="aside_images">
-                <img src="http://satyr.io/100x100/white" alt="food" width="100" height="100">
-                <img src="http://satyr.io/100x100/white" alt="food" width="100" height="100">
-                <img src="http://satyr.io/100x100/white" alt="food" width="100" height="100">
-                <img src="http://satyr.io/100x100/white" alt="food" width="100" height="100">
-                <img src="http://satyr.io/100x100/white" alt="food" width="100" height="100">
-                <img src="http://satyr.io/100x100/white" alt="food" width="100" height="100">
-                <img src="http://satyr.io/100x100/white" alt="food" width="100" height="100">
-                <img src="http://satyr.io/100x100/white" alt="food" width="100" height="100">
-                <img src="http://satyr.io/100x100/white" alt="food" width="100" height="100">
-                <img src="http://satyr.io/100x100/white" alt="food" width="100" height="100">
+                <img src="pictures/roll.jpg" alt="food" width="100" height="100">
+                <img src="pictures/burger.jpg" alt="food" width="100" height="100">
+                <img src="pictures/roll.jpg" alt="food" width="100" height="100">
+                <img src="pictures/burger.jpg" alt="food" width="100" height="100">
+                <img src="pictures/roll.jpg" alt="food" width="100" height="100">
+                <img src="pictures/burger.jpg" alt="food" width="100" height="100">
+                <img src="pictures/roll.jpg" alt="food" width="100" height="100">
+                <img src="pictures/burger.jpg" alt="food" width="100" height="100">
             </div>
         </aside>
     </section>
@@ -729,7 +727,12 @@
                     calories: json.hits[i].fields.nf_calories,
                     name:  json.hits[i].fields.item_name,
                     total_fat: json.hits[i].fields.nf_total_fat,
-                    protein: json.hits[i].fields.nf_protein
+                    protein: json.hits[i].fields.nf_protein,
+                    brand: json.hits[i].fields.brand_name,
+                    sugars: json.hits[i].fields.nf_sugars,
+                    quantity: json.hits[i].fields.nf_serving_weight_grams,
+                    size: json.hits[i].fields.nf_serving_size_qty,
+                    unit: json.hits[i].fields.nf_serving_size_unit
                 }
             )
         }
@@ -740,7 +743,7 @@
         return new Promise((resolve, reject) => {
             const xhr = new XMLHttpRequest();
             xhr.open("GET", "https://nutritionix-api.p.rapidapi.com/v1_1/search/"+name+"?fields=item_name%2Cnf_calories" +
-                "%2Cnf_protein%2Cnf_total_fat");
+                "%2Cnf_protein%2Cnf_total_fat%2Cnf_serving_size_qty%2Cnf_serving_size_unit%2Cbrand_name%2Cnf_sugars"+"%2C"+"nf_serving_weight_grams");
             xhr.setRequestHeader("x-rapidapi-host", "nutritionix-api.p.rapidapi.com");
             xhr.setRequestHeader("x-rapidapi-key", "62cc3c3be3mshcad3df20843842ap139b49jsndc900c4dfc3f");
 
@@ -765,13 +768,21 @@
     }
 
     async function getFoodArrayByName(name, toAppendContentId) {
+        document.getElementById(toAppendContentId).innerText = "Výsledky hledání (0 z 10):";
         await getFoodRequest(name)
             .then(response => {
+                document.getElementById(toAppendContentId).innerText = "Výsledky hledání (10 z 10):";
                 for (let element of getFirstTenResults(response)) {
+                    if (element.quantity === null) {element.quantity = "Nespecifikováno"}
+                    if (element.size === null) {element.size = "Nespecifikováno"}
+                    if (element.unit === null) {element.unit = "Nespecifikováno"}
+                    if (element.sugars === null) {element.sugars = "Nespecifikováno"}
+
                     let createdElement = document.createElement("label");
                     createdElement.classList.add("label-content");
-                    createdElement.innerText = "Popis: "+element.name+" [Obsah v 1 porci] - Kalorie: "+ element.calories + "" +
-                        " - Bílkoviny: "+element.protein+ " - Tuky: "+element.total_fat;
+                    createdElement.innerText = "Popis: "+element.name+" \r Výrobce: "+element.brand +"\r Porce: "+element.size+" "
+                        +element.unit+", "+element.quantity  + " [g] \r Obsah v 1 porci: \r Kalorie: "+ element.calories + " kcal - Bílkoviny: "
+                        +element.protein+ " g - Tuky: "+element.total_fat + " g - Cukry: "+element.sugars + " g" ;
 
                     document.getElementById(toAppendContentId).appendChild(createdElement);
                 }
