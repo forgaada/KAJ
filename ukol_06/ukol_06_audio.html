@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>HW 06 audio</title>
+</head>
+<body>
+
+
+<script>
+    let connected = false;
+    let oscillator = null;
+    let context = null;
+    let volume = null;
+
+    function createOs() {
+        context = new window.AudioContext();
+
+        volume = context.createGain();
+        volume.gain.value = 0;
+
+        oscillator = context.createOscillator();
+        oscillator.type = 'sine';
+        oscillator.frequency.value = 0;
+
+        oscillator.connect(volume);
+        volume.connect(context.destination);
+
+        oscillator.start();
+        connected = true;
+    }
+
+    function playPause() {
+        if(connected) {
+            oscillator.disconnect(volume);
+            oscillator.stop();
+            connected = false;
+        } else {
+            connected = true;
+            oscillator = context.createOscillator();
+            oscillator.connect(volume);
+            oscillator.type = 'sine';
+            oscillator.frequency.value = 0;
+            volume.gain.value = 0;
+            oscillator.start();
+        }
+    }
+
+    function changeFrequency(event) {
+        oscillator.frequency.value = event.clientX / window.innerWidth * 3000;
+        volume.gain.value = event.clientY / window.innerHeight * 0.2;
+    }
+
+    window.addEventListener("click", playPause);
+    window.addEventListener("mousemove", (e) => changeFrequency(e));
+
+    createOs();
+</script>
+</body>
+</html>

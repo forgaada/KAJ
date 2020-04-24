@@ -52,7 +52,7 @@
         }
 
         #menu ul li {
-
+            list-style: none;
         }
 
         #menu ul li a {
@@ -86,7 +86,7 @@
 
         .page section nav .user-box {
             display: flex;
-            width: 150px;
+            width: 165px;
             margin: 5px;
             justify-content: center;
             align-content: start;
@@ -248,6 +248,10 @@
             display: none;
         }
 
+        .page section article .state-boxes {
+            display: none;
+        }
+
         .page section article .meals-boxes {
             display: none;
         }
@@ -390,6 +394,7 @@
             <label id="menu-control" for="menu-control-input">Menu</label><input type="checkbox" id="menu-control-input" />
             <ul class="main_menu">
                 <li><a href="home">Domů</a></li>
+                <li><a href="state">Denní příjem</a></li>
                 <li><a href="meals">Potraviny</a></li>
                 <li><a href="settings">Nastavení</a></li>
             </ul>
@@ -402,17 +407,18 @@
         <article id= "main">
             <h2 id="article-heading"></h2>
             <p id="article-content"></p>
-            <div class="content-box home-boxes">
+            <div class="content-box state-boxes">
                 <h4>Denní stav</h4>
                 <p>Stav naplnění denního příjmu kalorií:</p>
                 <div class="slider_bar">
                     <div class="slider_left" id="calories_bar"></div>
                     <div class="slider_right"></div>
                 </div>
+                <label class="label-content" id="income">Dnešní příjem činí:</label>
+                <label class="label-content" id="basal">Váš cílový kalorcký příjem: [kcal].</label>
                 <button class="content-button" id="state_button">Načíst</button>
 
             </div>
-            <!--TODO-->
             <div class="content-box meals-boxes">
                 <h4>Hledej jídlo online</h4>
                 <img src="pictures/nutritionix.jpg" alt="nutritionix-image" width="286" height="74">
@@ -420,8 +426,8 @@
                     <label>Najdi jídlo včetně nutričních hodnot na serveru Nutritionix (hledat je možné pouze v anglickém jazyce).</label>
                     <label for="find-meal-input">Název jídla: </label><input type="text" id="find-meal-input" placeholder="Nachos">
                     <button class="content-button" id="find-meal-button">Hledej</button>
-                <p id="find-meal-content-all">Výsledky hledání: </p>
                 </p>
+                <p id="find-meal-content-all">Výsledky hledání: </p>
             </div>
 
             <div class="content-box settings-boxes">
@@ -477,17 +483,18 @@
                 <h4> Dnes jsem snědl ... </h4>
                 <p>
                     <label for="meal-name-input">Název jídla: </label><input type="text" id="meal-name-input" placeholder="Zde zadejte název jídla">
-                    <label for="meal-calories-input">Počet kalorií na 100g/ml [kcal]: </label><input type="number" id="meal-calories-input" placeholder="Zde zadejte počet kalorií">
-                    <label for="meal-weight-input">Množství [g/ml]: </label><input type="number" id="meal-weight-input" placeholder="Zde zadejte množství">
-                    <button class="content-button" id="meal_button">Uložit</button>
+                    <label for="meal-calories-input">Počet kalorií na 100g/ml [kcal]: </label><input type="text" id="meal-calories-input" placeholder="Zde zadejte počet kalorií">
+                    <label for="meal-protein-input">Počet bílkovin na 100g/ml [g]: </label><input type="text" id="meal-protein-input" placeholder="Zde zadejte počet [g] bílkovin">
+                    <label for="meal-fat-input">Počet tuků na 100g/ml [g]: </label><input type="text" id="meal-fat-input" placeholder="Zde zadejte počet [g] tuku">
+                    <label for="meal-sugars-input">Počet sacharidů na 100g/ml [g]: </label><input type="text" id="meal-sugars-input" placeholder="Zde zadejte počet [g] kalorií">
+                    <label for="meal-weight-input">Množství [g/ml]: </label><input type="text" id="meal-weight-input" placeholder="Zde zadejte množství">
+                    <button class="content-button" id="meal_button">Zapsat</button>
                 </p>
 
             </div>
-            <div class="content-box home-boxes">
+            <div class="content-box state-boxes">
                 <h4>Dnešní pokrmy</h4>
                 <textarea id="meals" rows="10" cols="40" placeholder="Dnešní pokrmy" readonly></textarea>
-                <label class="label-content" id="income">Dnešní příjem činí: [kcal].</label>
-                <label class="label-content" id="basal">Váš cílový kalorcký příjem: [kcal].</label>
             </div>
         </article>
         <aside>
@@ -513,8 +520,14 @@
     const basal_button = document.getElementById("basal_button");
     const state_button = document.getElementById("state_button");
     const find_meal_button = document.getElementById("find-meal-button");
+
+    // NUTRICNI HODNOTY
     let calories_income = 0.0;
+    let protein_income = 0.0;
+    let fat_income = 0.0;
+    let sugars_income = 0.0;
     let basal = 0.0;
+
     let stats;
 
     window.onload = loadHomePage;
@@ -524,6 +537,13 @@
         loadContentBoxes("home-boxes");
         updateArticle("Kalkulátor denního kalorického příjmu",
             "Poznač si co jsi měl dnes k jídlu. ");
+    }
+
+    function loadStatePage() {
+        clearContentBoxes();
+        loadContentBoxes("state-boxes");
+        updateArticle("Přehled denního příjmu",
+            "Zde nalezneš poznamenané kalorické příjmy. ");
     }
 
     function loadMealsPage() {
@@ -548,6 +568,10 @@
                     switch (e.target.innerText) {
                         case "Domů": {
                             loadHomePage();
+                            break;
+                        }
+                        case "Denní příjem": {
+                            loadStatePage();
                             break;
                         }
                         case "Potraviny": {
@@ -601,9 +625,12 @@
     }
 
     class Meal {
-        constructor(name, calories, weight) {
+        constructor(name, calories, protein, fat, sugars, weight) {
             this._name = name;
             this._calories = calories;
+            this._protein = protein;
+            this._fat = fat;
+            this._sugars = sugars;
             this._weight = weight;
             this._id = "meal_"+getId();
         }
@@ -613,6 +640,12 @@
         get calories() {return this._calories;}
 
         get weight() {return this._weight;}
+
+        get protein() {return this._protein;}
+
+        get fat() {return this._fat;}
+
+        get sugars() {return this._sugars;}
 
         get id() {return this._id;}
 
@@ -680,17 +713,32 @@
 
     meal_button.addEventListener("click", function (e) {
         e.preventDefault();
-        let newMeal = new Meal(document.getElementById("meal-name-input").value, document.getElementById("meal-calories-input").value,
+        let newMeal = new Meal(
+            document.getElementById("meal-name-input").value,
+            document.getElementById("meal-calories-input").value,
+            document.getElementById("meal-protein-input").value,
+            document.getElementById("meal-fat-input").value,
+            document.getElementById("meal-sugars-input").value,
             document.getElementById("meal-weight-input").value);
-        document.getElementById("meals").value += newMeal.name + " s kaloriemi "
-            + newMeal.calories +" [kcal/100g]. V množství "+
-             newMeal.weight +" g." + '\r';
+        document.getElementById("meals").value += newMeal.name + " S hodnotami na 100g: Kalorie: "
+            + newMeal.calories +" [kcal] - Bílkoviny "+newMeal.protein+" g - Tuky: "+newMeal.fat+ " g - Sacharidy: "
+            + newMeal.sugars+ " g. V množství "+ newMeal.weight +" g." + '\r \r ';
         calories_income += newMeal.calories * newMeal.weight / 100;
+        protein_income += newMeal.protein * newMeal.weight / 100;
+        fat_income += newMeal.fat * newMeal.weight / 100;
+        sugars_income += newMeal.sugars * newMeal.weight / 100;
         document.getElementById("meal-name-input").value = "";
         document.getElementById("meal-calories-input").value = "";
+        document.getElementById("meal-protein-input").value = "";
+        document.getElementById("meal-fat-input").value = "";
+        document.getElementById("meal-sugars-input").value = "";
         document.getElementById("meal-weight-input").value = "";
         // localStorage.setItem('calories',calories_income);
-        document.getElementById("income").innerText = "Dnešní příjem činí "+ calories_income.toFixed(0) + "[kcal].";
+        document.getElementById("income").innerText = "Dnešní příjem činí " + '\r' +
+            calories_income.toFixed(0) + " [kcal]" + '\r' +
+            protein_income.toFixed(0) + " g bílkovin" + '\r' +
+                fat_income.toFixed(0) + " g tuků" + '\r' +
+                sugars_income.toFixed(0) + "g sacharidů";
         // newMeal.renderMeal();
     });
 
@@ -783,13 +831,41 @@
                     if (element.quantity === null) {element.quantity = "Nespecifikováno"}
                     if (element.size === null) {element.size = "Nespecifikováno"}
                     if (element.unit === null) {element.unit = "Nespecifikováno"}
+                    if (element.protein === null) {element.protein = "Nespecifikováno"}
+                    if (element.total_fat === null) {element.total_fat = "Nespecifikováno"}
                     if (element.sugars === null) {element.sugars = "Nespecifikováno"}
 
                     let createdElement = document.createElement("label");
                     createdElement.classList.add("label-content");
                     createdElement.innerText = "Popis: "+element.name+" \r Výrobce: "+element.brand +"\r Porce: "+element.size+" "
                         +element.unit+", "+element.quantity  + " [g] \r Obsah v 1 porci: \r Kalorie: "+ element.calories + " kcal - Bílkoviny: "
-                        +element.protein+ " g - Tuky: "+element.total_fat + " g - Cukry: "+element.sugars + " g" ;
+                        +element.protein+ " g - Tuky: "+element.total_fat + " g - Cukry: "+element.sugars + " g  \r" ;
+
+                    let createdButton = document.createElement("button");
+                    createdButton.classList.add("content-button");
+                    createdButton.innerText = "Zapsat";
+                    createdElement.appendChild(createdButton);
+
+                    createdButton.addEventListener("click", function (e) {
+                        e.preventDefault();
+                        document.getElementById("meal-name-input").value = element.name;
+                        if (element.calories === "Nespecifikováno" || element.quantity === "Nespecifikováno") {
+                            document.getElementById("meal-calories-input").value = 0;
+                        } else {document.getElementById("meal-calories-input").value = (100 * element.calories / element.quantity).toFixed(0)}
+                        if (element.protein === "Nespecifikováno" || element.quantity === "Nespecifikováno") {
+                            document.getElementById("meal-protein-input").value = 0;
+                        } else {document.getElementById("meal-protein-input").value = (100 * element.protein / element.quantity).toFixed(0)}
+                        if (element.total_fat === "Nespecifikováno" || element.quantity === "Nespecifikováno") {
+                            document.getElementById("meal-fat-input").value = 0;
+                        } else {document.getElementById("meal-fat-input").value = (100 * element.total_fat / element.quantity).toFixed(0)}
+                        if (element.sugars === "Nespecifikováno" || element.quantity === "Nespecifikováno") {
+                            document.getElementById("meal-sugars-input").value = 0;
+                        } else { document.getElementById("meal-sugars-input").value = (100 * element.sugars / element.quantity).toFixed(0)}
+                        if (element.quantity === "Nespecifikováno") {
+                            document.getElementById("meal-weight-input").value = 0;
+                        } else {document.getElementById("meal-weight-input").value = element.quantity}
+                        loadHomePage();
+                    });
 
                     document.getElementById(toAppendContentId).appendChild(createdElement);
                 }
