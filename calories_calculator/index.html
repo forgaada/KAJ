@@ -116,11 +116,9 @@
             overflow: hidden;
             text-overflow: ellipsis;
             max-width: 75ch;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+            background-color: white;
         }
-
-        /*#menu ul :nth-child(2n+1):hover + li {*/
-        /*    background-color: #256e2f;*/
-        /*}*/
 
         /** MAIN SECTION **/
 
@@ -193,13 +191,6 @@
             background-color: #348022;
         }
 
-        .page section article .content-box #meals {
-            box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
-            margin: 10px;
-            font-family: "Bookman Old Style", "S", serif;
-            resize: none;
-        }
-
         .page section article .label-content {
             box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
             background-color: white;
@@ -207,7 +198,7 @@
             padding: 5px;
         }
 
-        .page section article .content-box #find-meal-content-all {
+        .page section article .content-box .content-scrollable {
             max-height: 300px;
             overflow: auto;
             text-align:justify;
@@ -217,31 +208,6 @@
             display: flex;
             flex-direction: row;
             justify-content: space-around;
-        }
-
-        /*PROGRESS BAR*/
-
-        .slider_bar{
-            align-self: center;
-            width:75%;
-            height:15px;
-            margin: 1em;
-            border:1px solid #000;
-            overflow:hidden;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
-        }
-        .slider_left{
-            transition: all 1s;
-            width:0;
-            height:25px;
-            border-right: 1px solid #000000;
-            background: #d65946;
-        }
-        .slider_right {
-            color: #000000;
-            left: 25px;
-            position: relative;
-            top: -16px;
         }
 
         .page section article .home-boxes {
@@ -266,6 +232,14 @@
 
         .page section article .settings-boxes {
             display: none;
+        }
+
+        .page section #pie-chart {
+            display: none;
+            width: 200px;
+            height: 200px;
+            align-self: center;
+            border-radius: 50%;
         }
 
         /** ASIDE MENU SECTION **/
@@ -401,7 +375,7 @@
             <div class="user-box">
                 <h4>Uživatel</h4>
                 <img src="pictures/user.jpg" alt="user-image" width="100" height="100">
-                <p>Zde naleznete informace o uživateli</p>
+                <p id="user-name">Nepřihlášen</p>
             </div>
         </nav>
         <article id= "main">
@@ -409,11 +383,10 @@
             <p id="article-content"></p>
             <div class="content-box state-boxes">
                 <h4>Denní stav</h4>
-                <p>Stav naplnění denního příjmu kalorií:</p>
-                <div class="slider_bar">
-                    <div class="slider_left" id="calories_bar"></div>
-                    <div class="slider_right"></div>
-                </div>
+                <p>Stav naplnění denního příjmu kalorií</p>
+                <!-- Daily income Pie Chart vie SVG -->
+                <svg id="pie-chart" viewBox="0 0 200 200"></svg>
+
                 <label class="label-content" id="income">Dnešní příjem činí:</label>
                 <label class="label-content" id="basal">Váš cílový kalorcký příjem: [kcal].</label>
                 <button class="content-button" id="state_button">Načíst</button>
@@ -427,7 +400,7 @@
                     <label for="find-meal-input">Název jídla: </label><input type="text" id="find-meal-input" placeholder="Nachos">
                     <button class="content-button" id="find-meal-button">Hledej</button>
                 </p>
-                <p id="find-meal-content-all">Výsledky hledání: </p>
+                <p id="find-meal-content-all" class="content-scrollable">Výsledky hledání: </p>
             </div>
 
             <div class="content-box settings-boxes">
@@ -494,7 +467,7 @@
             </div>
             <div class="content-box state-boxes">
                 <h4>Dnešní pokrmy</h4>
-                <textarea id="meals" rows="10" cols="40" placeholder="Dnešní pokrmy" readonly></textarea>
+                <p id="today-meals-all" class="content-scrollable"> Přehled dnešních porkmů: </p>
             </div>
         </article>
         <aside>
@@ -526,9 +499,10 @@
     let protein_income = 0.0;
     let fat_income = 0.0;
     let sugars_income = 0.0;
-    let basal = 0.0;
+    let basal = 0.01;
 
     let stats;
+    let pieChart = null;
 
     window.onload = loadHomePage;
 
@@ -605,19 +579,23 @@
         document.getElementById("article-content").innerText = content;
     }
 
-    function update_bar(maxValue, actualValue, barId){
-        if (maxValue === 0) {
-            document.getElementById(barId).innerText = 'Nespecifikováno';
-            return;
+    function loadStateData() {
+        document.getElementById("pie-chart").style.display = "initial";
+        if (pieChart === null) {
+            pieChart = new SVGPieChart("#pie-chart");
+        } else {
+            pieChart.clear();
         }
-        let width =Math.round((actualValue/maxValue)*100);
-        document.getElementById(barId).style.width= width+'%';
-        document.getElementById(barId).innerText = width+'%';
-    }
+        let percentage = calories_income/basal*100;
 
-
-    function loadData() {
-        update_bar(basal,calories_income,"calories_bar");
+        pieChart.drawChart(100,"grey",false);
+        if (percentage < 50) {
+            pieChart.drawChart(percentage,"lime",true);
+        } else if (percentage< 75 ){
+            pieChart.drawChart(percentage,"orange",true);
+        } else {
+            pieChart.drawChart(percentage,"red",true);
+        }
     }
 
     function getId () {
@@ -650,36 +628,21 @@
         get id() {return this._id;}
 
         renderMeal () {
-            let createdElement = document.createElement("div");
-            createdElement.id = this.id;
-            createdElement.classList.add("content-box");
-
-            let createdHeader = document.createElement("h4");
-            createdHeader.innerText = this.name;
-            createdElement.appendChild(createdHeader);
-
-            let createdP = document.createElement("p");
-            createdElement.appendChild(createdP);
-
-            let createdImage = document.createElement("img");
-            createdImage.src = "http://satyr.io/100x100/white";
-            createdImage.alt = "food";
-            createdImage.width = 100;
-            createdImage.height = 100;
-            createdImage.style.alignSelf = "center";
-            createdP.appendChild(createdImage);
-
-            let createdLabel1 = document.createElement("label");
-            createdLabel1.innerText = "Calories: "+this.calories+" Weight: "+this.weight;
-            createdP.appendChild(createdLabel1);
+            let createdElement = document.createElement("label");
+            createdElement.classList.add("label-content");
+            createdElement.innerText = this.name + " \r S hodnotami na 100g: Kalorie: "
+                + this.calories +" [kcal] - Bílkoviny "+this.protein+" g - Tuky: "+this.fat+ " g - Sacharidy: "
+                + this.sugars+ " g. V množství "+ this.weight +" g." + '\r \r ';
 
             let createdButton = document.createElement("button");
-            createdButton.id = "button_"+getId();
-            createdButton.innerText = "Smazat";
             createdButton.classList.add("content-button");
-            createdP.appendChild(createdButton);
+            createdButton.innerText = "Smazat";
+            createdElement.appendChild(createdButton);
+            document.querySelector("#today-meals-all").appendChild(createdElement);
 
-            document.querySelector("#main").appendChild(createdElement);
+            createdButton.addEventListener("click", function () {
+                document.querySelector("#today-meals-all").removeChild(createdElement);
+            })
         }
     }
 
@@ -705,10 +668,62 @@
             this._basal = newBasal* this._activity * this._goal;
         }
 
-
         get basal() {
             return this._basal;
         }
+    }
+
+    class SVGPieChart {
+            constructor (svgElementId) {
+                this._svg = document.querySelector(svgElementId);
+                this._svgNs = "http://www.w3.org/2000/svg";
+            }
+
+            drawChart (percentage, color, customChart) {
+                if (percentage === null) {percentage = 0}
+                if (percentage>100) {percentage = 100}
+                let angle = percentage * 3.6;
+
+                let pathElement = document.createElementNS(this._svgNs, "path");
+                pathElement.setAttributeNS(null,"d", this.setArc(100, 100, angle));
+                pathElement.setAttributeNS(null,"stroke-width","50");
+                pathElement.setAttributeNS(null,"stroke",color);
+                pathElement.setAttributeNS(null,"fill","none");
+
+                let textElement = document.createElementNS(this._svgNs, "text");
+                textElement.setAttributeNS(null,"x","80");
+                textElement.setAttributeNS(null,"y","100");
+                textElement.setAttributeNS(null,"fill","black");
+                textElement.setAttributeNS(null,"height","40");
+
+                if (customChart) {textElement.textContent = percentage.toFixed(0) + " %"}
+
+                this._svg.appendChild(pathElement);
+                this._svg.appendChild(textElement);
+            }
+
+            setArc(x, y, angleTo){
+                let start = this.getCartesianCoordinates(x, y, angleTo);
+                let end = this.getCartesianCoordinates(x, y, 0);
+
+                let arcFlag = 0;
+                if (angleTo >= 180) {arcFlag = 1}
+
+                return `M ${start.x} ${start.y} A 100 100 0 ${arcFlag} 0 ${end.x} ${end.y}`;
+            }
+
+            getCartesianCoordinates(centerX, centerY, angle) {
+                let angleInRadians = (angle-90) * 3.14 / 180.0;
+
+                return {
+                    x: centerX + (100 * Math.cos(angleInRadians)),
+                    y: centerY + (100 * Math.sin(angleInRadians))
+                };
+            }
+
+            clear() {
+                this._svg.innerHTML = "";
+            }
     }
 
     meal_button.addEventListener("click", function (e) {
@@ -720,26 +735,26 @@
             document.getElementById("meal-fat-input").value,
             document.getElementById("meal-sugars-input").value,
             document.getElementById("meal-weight-input").value);
-        document.getElementById("meals").value += newMeal.name + " S hodnotami na 100g: Kalorie: "
-            + newMeal.calories +" [kcal] - Bílkoviny "+newMeal.protein+" g - Tuky: "+newMeal.fat+ " g - Sacharidy: "
-            + newMeal.sugars+ " g. V množství "+ newMeal.weight +" g." + '\r \r ';
+
         calories_income += newMeal.calories * newMeal.weight / 100;
         protein_income += newMeal.protein * newMeal.weight / 100;
         fat_income += newMeal.fat * newMeal.weight / 100;
         sugars_income += newMeal.sugars * newMeal.weight / 100;
+
         document.getElementById("meal-name-input").value = "";
         document.getElementById("meal-calories-input").value = "";
         document.getElementById("meal-protein-input").value = "";
         document.getElementById("meal-fat-input").value = "";
         document.getElementById("meal-sugars-input").value = "";
         document.getElementById("meal-weight-input").value = "";
-        // localStorage.setItem('calories',calories_income);
+
         document.getElementById("income").innerText = "Dnešní příjem činí " + '\r' +
             calories_income.toFixed(0) + " [kcal]" + '\r' +
             protein_income.toFixed(0) + " g bílkovin" + '\r' +
                 fat_income.toFixed(0) + " g tuků" + '\r' +
                 sugars_income.toFixed(0) + "g sacharidů";
-        // newMeal.renderMeal();
+
+        newMeal.renderMeal();
     });
 
     basal_button.addEventListener("click", function (e) {
@@ -761,7 +776,7 @@
 
     state_button.addEventListener("click", function (e) {
         e.preventDefault();
-        loadData();
+        loadStateData();
     });
 
     find_meal_button.addEventListener("click", function (e) {
