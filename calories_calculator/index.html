@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="cs">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -250,7 +250,7 @@
             align-items: center;
             flex-direction: column;
             background-color: #2fd015;
-            width: 175px;
+            width: 150px;
             margin: 1em;
             box-sizing: border-box;
             transition: all 0.5s ease-in;
@@ -258,22 +258,29 @@
             box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
         }
 
-        .page section aside .aside_images {
-            display: flex;
-            flex-wrap: wrap;
-            flex-grow: 1;
-            align-content: flex-start;
-            justify-content: center;
+        .page section aside h4{
+            width: 200px;
+            font-size: 25px;
+            transform: rotate(90deg);
         }
 
-        .page section aside .aside_images img {
-            margin: 10px;
-            border-radius: 1em;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+        .page section aside p {
+            width: 200px;
+            display: none;
         }
 
         .page section aside:hover {
-            width: 300px;
+            width: 250px;
+        }
+
+        .page section aside:hover h4{
+            transform: rotate(0deg);
+        }
+
+        .page section aside:hover p {
+            display: flex;
+            margin: 10px 10px;
+            font-size: 16px;
         }
 
         /** FOOTER **/
@@ -471,17 +478,10 @@
             </div>
         </article>
         <aside>
-            <h4> Oblíbená jídla</h4>
-            <div class="aside_images">
-                <img src="pictures/roll.jpg" alt="food" width="100" height="100">
-                <img src="pictures/burger.jpg" alt="food" width="100" height="100">
-                <img src="pictures/roll.jpg" alt="food" width="100" height="100">
-                <img src="pictures/burger.jpg" alt="food" width="100" height="100">
-                <img src="pictures/roll.jpg" alt="food" width="100" height="100">
-                <img src="pictures/burger.jpg" alt="food" width="100" height="100">
-                <img src="pictures/roll.jpg" alt="food" width="100" height="100">
-                <img src="pictures/burger.jpg" alt="food" width="100" height="100">
-            </div>
+            <h4>Věděli jste, že?</h4>
+            <p>Bazální rychlost metabolismu (BMR) je měření energetického výdeje organismu v klidu.</p>
+            <p> Určuje kolik kalorií potřebujete denně přijmout, abyste si udrželi hmotnost nebo ji naopak snížili.</p>
+            <p> Jde o počet kalorií, které tělo potřebuje pro správný chod základních životních funkcí.</p>
         </aside>
     </section>
     <footer>
