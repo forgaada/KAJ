@@ -222,6 +222,16 @@
             display: none;
         }
 
+        .page section article #page-logo {
+            align-self: center;
+            width: 250px;
+            height: 250px;
+            border-radius: 50%;
+            background: transparent;
+            margin: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+        }
+
         .page section article .meals-boxes img {
             border-radius: 10px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
@@ -403,6 +413,7 @@
         <article id= "main">
             <h2 id="article-heading"></h2>
             <p id="article-content"></p>
+            <img id="page-logo" src="pictures/logo.png" alt="food">
             <div class="content-box state-boxes">
                 <h4>Denní stav</h4>
                 <p>Stav naplnění denního příjmu kalorií</p>
@@ -527,6 +538,7 @@
         loadContentBoxes("home-boxes");
         updateArticle("Kalkulátor denního kalorického příjmu",
             "Poznač si co jsi měl dnes k jídlu. ");
+        document.getElementById("page-logo").src= "pictures/fruit.jpg";
     }
 
     function loadStatePage() {
@@ -534,6 +546,7 @@
         loadContentBoxes("state-boxes");
         updateArticle("Přehled denního příjmu",
             "Zde nalezneš poznamenané kalorické příjmy. ");
+        document.getElementById("page-logo").src= "pictures/pears.jpg";
     }
 
     function loadMealsPage() {
@@ -541,6 +554,7 @@
         loadContentBoxes("meals-boxes");
         updateArticle("Potraviny",
             "V této sekci nalezneš přehled již uložených potravin. Můžeš také hledat potraviny online.");
+        document.getElementById("page-logo").src= "pictures/jahody.jpg";
     }
 
     function loadSettingsPage() {
@@ -548,6 +562,7 @@
         loadContentBoxes("settings-boxes");
         updateArticle("Nastavení kalorického příjmu",
             "Vyplň tabulku pro výpočet bazálního metabolismu pro zjištění doporučeného denního kalorického příjmu.");
+        document.getElementById("page-logo").src= "pictures/breakfast.jpg";
     }
 
         for (let element of document.getElementsByTagName("a")){
