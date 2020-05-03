@@ -246,7 +246,7 @@
 
         .page section aside {
             display: flex;
-            justify-content: center;
+            justify-content: flex-start;
             align-items: center;
             flex-direction: column;
             background-color: #2fd015;
@@ -259,12 +259,20 @@
         }
 
         .page section aside h4{
+            margin-top: 150px;
             width: 200px;
             font-size: 25px;
             transform: rotate(90deg);
+            transition: all 0.5s ease-in;
         }
 
         .page section aside p {
+            width: 200px;
+            display: none;
+        }
+
+        .page section aside img {
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
             width: 200px;
             display: none;
         }
@@ -275,12 +283,19 @@
 
         .page section aside:hover h4{
             transform: rotate(0deg);
+            margin-top: 10px;
         }
 
         .page section aside:hover p {
             display: flex;
             margin: 10px 10px;
             font-size: 16px;
+        }
+
+        .page section aside:hover img {
+            display: flex;
+            margin: 10px 10px;
+            border-radius: 15px;
         }
 
         /** FOOTER **/
@@ -482,6 +497,7 @@
             <p>Bazální rychlost metabolismu (BMR) je měření energetického výdeje organismu v klidu.</p>
             <p> Určuje kolik kalorií potřebujete denně přijmout, abyste si udrželi hmotnost nebo ji naopak snížili.</p>
             <p> Jde o počet kalorií, které tělo potřebuje pro správný chod základních životních funkcí.</p>
+            <img src="pictures/bmr.jpg" alt="bmr-schema">
         </aside>
     </section>
     <footer>
