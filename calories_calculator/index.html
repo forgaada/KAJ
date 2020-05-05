@@ -713,12 +713,12 @@
     class Stats {
 
         constructor() {
-            this._name = "";
-            this._basal = 0;
-            this._calories = 0;
-            this._protein_income = 0;
-            this._fat_income = 0;
-            this._sugars_income = 0;
+            this._name = "Neznámý";
+            this._basal = 0.01;
+            this._calories = 0.0;
+            this._protein_income = 0.0;
+            this._fat_income = 0.0;
+            this._sugars_income = 0.0;
             this.loadStats();
         }
 
@@ -756,6 +756,10 @@
         }
 
         loadStats () {
+            if (localStorage.getItem("stats") === null) {
+                this.saveStats();
+                return;
+            }
             let loadObject = localStorage.getItem("stats");
             let statsObject = JSON.parse(loadObject);
 
