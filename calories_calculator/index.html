@@ -412,7 +412,7 @@
             <div class="user-box">
                 <h4>Uživatel</h4>
                 <img src="pictures/user.jpg" alt="user-image" width="100" height="100">
-                <p id="user-name">Nepřihlášen</p>
+                <p id="user-name">Neznámý</p>
             </div>
         </nav>
         <article id= "main">
@@ -444,6 +444,7 @@
             <div class="content-box settings-boxes">
                 <h4>Výpočet bazálního metabolismu</h4>
                 <p>
+                    <label for="name-input">Vaše jméno: </label><input type="text" id="name-input" placeholder="Pišta">
                     <label for="weight-input">Vaše tělesná hmotnost v [kg]: </label><input type="number" id="weight-input" placeholder="Hmotnost">
                     <label for="height-input">Vaše výška v [cm]: </label><input type="number" id="height-input" placeholder="Výška">
                     <label for="age-input">Váš věk: </label><input type="number" id="age-input" placeholder="Věk">
@@ -555,7 +556,13 @@
     let stats;
     let pieChart = null;
 
-    window.onload = loadHomePage;
+    window.onload = load;
+
+    function load() {
+        loadHomePage();
+        stats = new Stats();
+        stats.updateUserInfo();
+    }
 
     function loadHomePage() {
         clearContentBoxes();
@@ -589,7 +596,7 @@
         settingsPageImg.src = "pictures/breakfast.jpg";
     }
 
-        for (let element of document.getElementsByTagName("a")){
+    for (let element of document.getElementsByTagName("a")){
             element.addEventListener("click", function(e) {
                 e.preventDefault();
                 document.getElementById("menu-control-input").checked = false;
@@ -702,18 +709,19 @@
     }
 
     class Stats {
-        constructor(weight, height, age, sex, activity, goal) {
+
+        constructor() {
+            this.loadStats();
+        }
+
+        calculateBasal (name, weight, height, age, sex, activity, goal) {
+            this._name = name;
             this._weight = weight;
             this._height = height;
             this._age = age;
             this._sex = sex;
             this._activity = activity;
             this._goal = goal;
-            this._basal = 0.0;
-            this._meals = [];
-        }
-
-        calculateBasal () {
             let newBasal = 0.0;
             if (this._sex === "female") {
                 newBasal = 655.0955 + (9.5634 * this._weight) + (1.8496* this._height) - (4.6756 * this._age);
@@ -726,6 +734,27 @@
         get basal() {
             return this._basal;
         }
+
+        saveStats () {
+            let saveObject = {
+                name: this._name,
+                basal: this.basal,
+            };
+            localStorage.setItem("stats", JSON.stringify(saveObject));
+        }
+
+        loadStats () {
+            let loadObject = localStorage.getItem("stats");
+            let statsObject = JSON.parse(loadObject);
+            this._name = statsObject.name;
+            this._basal = statsObject.basal;
+        }
+
+        updateUserInfo () {
+            this.loadStats();
+            document.getElementById("user-name").innerText = "Uživatel: " + this._name + '\r' + "Basal: "+this.basal.toFixed(0);
+        }
+
     }
 
     class SVGPieChart {
@@ -821,21 +850,24 @@
 
     basal_button.addEventListener("click", function (e) {
         e.preventDefault();
+        let textElementsToValidate = ["name-input"];
         let numberElementsToValidate = ["weight-input","height-input","age-input"];
-        if (!validate(numberElementsToValidate, [])) {
+        if (!validate(numberElementsToValidate, textElementsToValidate)) {
             return
         }
-        stats = new Stats(
+        stats = new Stats();
+        stats.calculateBasal(
+            document.getElementById("name-input").value,
             document.getElementById("weight-input").value,
             document.getElementById("height-input").value,
             document.getElementById("age-input").value,
             document.querySelector('.sex:checked').value,
             document.querySelector('.activity:checked').value,
-            document.querySelector('.goal:checked').value
-        );
-        stats.calculateBasal();
+            document.querySelector('.goal:checked').value);
         basal = stats.basal;
         document.getElementById("basal").innerText = "Váš cílový kalorcký příjem:  "+ stats.basal.toFixed(0) + " [kcal].";
+        stats.saveStats();
+        stats.updateUserInfo();
         loadStatePage();
     });
 
