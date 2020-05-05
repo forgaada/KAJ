@@ -526,6 +526,25 @@
     const state_button = document.getElementById("state_button");
     const find_meal_button = document.getElementById("find-meal-button");
 
+    //Images
+    let pageLogoImg = document.getElementById("page-logo");
+    let homePageImg = new Image();
+    homePageImg.onload = function () {
+        pageLogoImg.src = this.src;
+    };
+    let statePageImg = new Image();
+    statePageImg.onload = function () {
+        pageLogoImg.src = this.src;
+    };
+    let mealsPageImg = new Image();
+    mealsPageImg.onload = function () {
+        pageLogoImg.src = this.src;
+    };
+    let settingsPageImg = new Image();
+    settingsPageImg.onload = function () {
+        pageLogoImg.src = this.src;
+    };
+
     // NUTRICNI HODNOTY
     let calories_income = 0.0;
     let protein_income = 0.0;
@@ -543,7 +562,7 @@
         loadContentBoxes("home-boxes");
         updateArticle("Kalkulátor denního kalorického příjmu",
             "Poznač si co jsi měl dnes k jídlu. ");
-        document.getElementById("page-logo").src= "pictures/fruit.jpg";
+        homePageImg.src = "pictures/fruit.jpg";
     }
 
     function loadStatePage() {
@@ -551,7 +570,7 @@
         loadContentBoxes("state-boxes");
         updateArticle("Přehled denního příjmu",
             "Zde nalezneš poznamenané kalorické příjmy. ");
-        document.getElementById("page-logo").src= "pictures/pears.jpg";
+        statePageImg.src = "pictures/pears.jpg";
     }
 
     function loadMealsPage() {
@@ -559,7 +578,7 @@
         loadContentBoxes("meals-boxes");
         updateArticle("Potraviny",
             "V této sekci nalezneš přehled již uložených potravin. Můžeš také hledat potraviny online.");
-        document.getElementById("page-logo").src= "pictures/jahody.jpg";
+        mealsPageImg.src = "pictures/jahody.jpg";
     }
 
     function loadSettingsPage() {
@@ -567,7 +586,7 @@
         loadContentBoxes("settings-boxes");
         updateArticle("Nastavení kalorického příjmu",
             "Vyplň tabulku pro výpočet bazálního metabolismu pro zjištění doporučeného denního kalorického příjmu.");
-        document.getElementById("page-logo").src= "pictures/breakfast.jpg";
+        settingsPageImg.src = "pictures/breakfast.jpg";
     }
 
         for (let element of document.getElementsByTagName("a")){
@@ -826,6 +845,7 @@
     });
 
     find_meal_button.addEventListener("click", function (e) {
+        e.preventDefault();
         let textElementsToValidate = ["find-meal-input"];
         if (!validate([],textElementsToValidate)) {
             return
@@ -839,7 +859,7 @@
 
     function validateNumberInput(inputElementId) {
         let element = document.getElementById(inputElementId);
-        if (element.value < 0 || element.value==="") {
+        if (element.value < 0 || element.value==="" || isNaN(element.value)) {
             element.classList.add("error");
             return false;
         } else if (element.classList.contains("error")) {
@@ -851,7 +871,7 @@
 
     function validateTextInput(inputElementId) {
         let element = document.getElementById(inputElementId);
-        if (element.value === "") {
+        if (element.value === "" || element.value.length>150) {
             element.classList.add("error");
             return false;
         } else if (element.classList.contains("error")) {
