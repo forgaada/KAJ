@@ -319,6 +319,11 @@
             color: white;
         }
 
+        /** ERROR **/
+        .error {
+            border-color: red;
+            border-width: 3px;
+        }
 
         /** MOBILE / TABLET SECTION **/
 
@@ -759,6 +764,12 @@
 
     meal_button.addEventListener("click", function (e) {
         e.preventDefault();
+        let textElementsToValidate = ["meal-name-input"];
+        let numberElementsToValidate = ["meal-calories-input","meal-protein-input","meal-fat-input",
+            "meal-sugars-input","meal-weight-input"];
+        if (!validate(numberElementsToValidate,textElementsToValidate)) {
+            return
+        }
         let newMeal = new Meal(
             document.getElementById("meal-name-input").value,
             document.getElementById("meal-calories-input").value,
@@ -786,10 +797,15 @@
                 sugars_income.toFixed(0) + "g sacharidů";
 
         newMeal.renderMeal();
+        loadStatePage();
     });
 
     basal_button.addEventListener("click", function (e) {
         e.preventDefault();
+        let numberElementsToValidate = ["weight-input","height-input","age-input"];
+        if (!validate(numberElementsToValidate, [])) {
+            return
+        }
         stats = new Stats(
             document.getElementById("weight-input").value,
             document.getElementById("height-input").value,
@@ -800,9 +816,8 @@
         );
         stats.calculateBasal();
         basal = stats.basal;
-        // localStorage.setItem('basal',stats.basal);
         document.getElementById("basal").innerText = "Váš cílový kalorcký příjem:  "+ stats.basal.toFixed(0) + " [kcal].";
-
+        loadStatePage();
     });
 
     state_button.addEventListener("click", function (e) {
@@ -811,11 +826,55 @@
     });
 
     find_meal_button.addEventListener("click", function (e) {
-        e.preventDefault();
+        let textElementsToValidate = ["find-meal-input"];
+        if (!validate([],textElementsToValidate)) {
+            return
+        }
         document.getElementById("find-meal-content-all").innerHTML = 'Výsledky hledání: ';
         getFoodArrayByName(document.getElementById("find-meal-input").value,"find-meal-content-all");
         document.getElementById("find-meal-input").innerText = "";
     });
+
+    // INPUT VALIDATION SECTION
+
+    function validateNumberInput(inputElementId) {
+        let element = document.getElementById(inputElementId);
+        if (element.value < 0 || element.value==="") {
+            element.classList.add("error");
+            return false;
+        } else if (element.classList.contains("error")) {
+            element.classList.remove("error");
+            return true;
+        }
+        return true;
+    }
+
+    function validateTextInput(inputElementId) {
+        let element = document.getElementById(inputElementId);
+        if (element.value === "") {
+            element.classList.add("error");
+            return false;
+        } else if (element.classList.contains("error")) {
+            element.classList.remove("error");
+            return true;
+        }
+        return true;
+    }
+
+    function validate(numberInputs, textInputs) {
+        let success = true;
+            for (let id of numberInputs) {
+                if (!validateNumberInput(id)) {
+                    success = false;
+                }
+            }
+            for (let tid of textInputs) {
+                if (!validateTextInput(tid)) {
+                    success = false;
+                }
+            }
+        return success;
+    }
 
 
     //FETCHING DATA FROM Nutrition-ix BY XML-HTTP-REQUEST + PROMISES INTERFACE ( WORKS ONLY WITH INTERNET CONNECTION )
