@@ -546,13 +546,6 @@
         pageLogoImg.src = this.src;
     };
 
-    // NUTRICNI HODNOTY
-    let calories_income = 0.0;
-    let protein_income = 0.0;
-    let fat_income = 0.0;
-    let sugars_income = 0.0;
-    let basal = 0.01;
-
     let stats;
     let pieChart = null;
 
@@ -574,6 +567,7 @@
 
     function loadStatePage() {
         clearContentBoxes();
+        loadStateData();
         loadContentBoxes("state-boxes");
         updateArticle("Přehled denního příjmu",
             "Zde nalezneš poznamenané kalorické příjmy. ");
@@ -648,7 +642,7 @@
         } else {
             pieChart.clear();
         }
-        let percentage = calories_income/basal*100;
+        let percentage = stats._calories/stats.basal*100;
 
         pieChart.drawChart(100,"grey",false);
         if (percentage < 50) {
@@ -658,6 +652,14 @@
         } else {
             pieChart.drawChart(percentage,"red",true);
         }
+
+        document.getElementById("income").innerText = "Dnešní příjem činí " + '\r' +
+            stats._calories.toFixed(0) + " [kcal]" + '\r' +
+            stats._protein_income.toFixed(0) + " g bílkovin" + '\r' +
+            stats._fat_income.toFixed(0) + " g tuků" + '\r' +
+            stats._sugars_income.toFixed(0) + "g sacharidů";
+
+        document.getElementById("basal").innerText = "Váš cílový kalorcký příjem:  "+ stats.basal.toFixed(0) + " [kcal].";
     }
 
     function getId () {
@@ -711,6 +713,12 @@
     class Stats {
 
         constructor() {
+            this._name = "";
+            this._basal = 0;
+            this._calories = 0;
+            this._protein_income = 0;
+            this._fat_income = 0;
+            this._sugars_income = 0;
             this.loadStats();
         }
 
@@ -739,6 +747,10 @@
             let saveObject = {
                 name: this._name,
                 basal: this.basal,
+                calories: this._calories,
+                protein: this._protein_income,
+                fat: this._fat_income,
+                sugars: this._sugars_income
             };
             localStorage.setItem("stats", JSON.stringify(saveObject));
         }
@@ -746,13 +758,28 @@
         loadStats () {
             let loadObject = localStorage.getItem("stats");
             let statsObject = JSON.parse(loadObject);
+
             this._name = statsObject.name;
             this._basal = statsObject.basal;
+            this._calories = statsObject.calories;
+            this._protein_income = statsObject.protein;
+            this._fat_income = statsObject.fat;
+            this._sugars_income = statsObject.sugars;
+
+            if (this._name === undefined || this._name === null) {this._name = "Neznámý"}
+            if (this._basal === undefined || this._basal === null) {this._basal = 0.01;}
+            if (this._calories === undefined || this._calories === null) {this._calories = 0.0;}
+            if (this._protein_income === undefined || this._protein_income === null) {this._protein_income = 0.0;}
+            if (this._fat_income === undefined || this._fat_income === null) {this._fat_income = 0.0;}
+            if (this._sugars_income === undefined || this._sugars_income === null) {this._sugars_income = 0.0;}
         }
 
         updateUserInfo () {
             this.loadStats();
-            document.getElementById("user-name").innerText = "Uživatel: " + this._name + '\r' + "Basal: "+this.basal.toFixed(0);
+            document.getElementById("user-name").innerText =
+                "Uživatel: " + this._name + '\r' +
+                "Basal: "+this.basal.toFixed(0)+ '\r' +
+                "Příjem: "+this._calories.toFixed(0);
         }
 
     }
@@ -826,10 +853,10 @@
             document.getElementById("meal-sugars-input").value,
             document.getElementById("meal-weight-input").value);
 
-        calories_income += newMeal.calories * newMeal.weight / 100;
-        protein_income += newMeal.protein * newMeal.weight / 100;
-        fat_income += newMeal.fat * newMeal.weight / 100;
-        sugars_income += newMeal.sugars * newMeal.weight / 100;
+        stats._calories += newMeal.calories * newMeal.weight / 100;
+        stats._protein_income += newMeal.protein * newMeal.weight / 100;
+        stats._fat_income += newMeal.fat * newMeal.weight / 100;
+        stats._sugars_income += newMeal.sugars * newMeal.weight / 100;
 
         document.getElementById("meal-name-input").value = "";
         document.getElementById("meal-calories-input").value = "";
@@ -838,13 +865,10 @@
         document.getElementById("meal-sugars-input").value = "";
         document.getElementById("meal-weight-input").value = "";
 
-        document.getElementById("income").innerText = "Dnešní příjem činí " + '\r' +
-            calories_income.toFixed(0) + " [kcal]" + '\r' +
-            protein_income.toFixed(0) + " g bílkovin" + '\r' +
-                fat_income.toFixed(0) + " g tuků" + '\r' +
-                sugars_income.toFixed(0) + "g sacharidů";
-
         newMeal.renderMeal();
+        stats.saveStats();
+        stats.updateUserInfo();
+
         loadStatePage();
     });
 
@@ -864,8 +888,6 @@
             document.querySelector('.sex:checked').value,
             document.querySelector('.activity:checked').value,
             document.querySelector('.goal:checked').value);
-        basal = stats.basal;
-        document.getElementById("basal").innerText = "Váš cílový kalorcký příjem:  "+ stats.basal.toFixed(0) + " [kcal].";
         stats.saveStats();
         stats.updateUserInfo();
         loadStatePage();
