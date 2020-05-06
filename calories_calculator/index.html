@@ -422,12 +422,11 @@
             <div class="content-box state-boxes">
                 <h4>Denní stav</h4>
                 <p>Stav naplnění denního příjmu kalorií</p>
-                <!-- Daily income Pie Chart vie SVG -->
                 <svg id="pie-chart" viewBox="0 0 200 200"></svg>
 
                 <label class="label-content" id="income">Dnešní příjem činí:</label>
-                <label class="label-content" id="basal">Váš cílový kalorcký příjem: [kcal].</label>
-                <button class="content-button" id="state_button">Načíst</button>
+                <label class="label-content" id="basal">Váš cílový kalorický příjem: [kcal].</label>
+                <button class="content-button" id="state_button">Vymazat</button>
 
             </div>
             <div class="content-box meals-boxes">
@@ -561,7 +560,7 @@
         clearContentBoxes();
         loadContentBoxes("home-boxes");
         updateArticle("Kalkulátor denního kalorického příjmu",
-            "Poznač si co jsi měl dnes k jídlu. ");
+            "Poznač si, co jsi měl dnes k jídlu. Pro hledání potravin online přejdi na 'Potraviny'.");
         homePageImg.src = "pictures/fruit.jpg";
     }
 
@@ -570,7 +569,7 @@
         loadStateData();
         loadContentBoxes("state-boxes");
         updateArticle("Přehled denního příjmu",
-            "Zde nalezneš poznamenané kalorické příjmy. ");
+            "Zde nalezneš přehled aktuálního plnění doporučeného denního kalorického příjmu včetně zapsaných jídel.");
         statePageImg.src = "pictures/pears.jpg";
     }
 
@@ -578,7 +577,7 @@
         clearContentBoxes();
         loadContentBoxes("meals-boxes");
         updateArticle("Potraviny",
-            "V této sekci nalezneš přehled již uložených potravin. Můžeš také hledat potraviny online.");
+            "V této sekci můžeš hledat nutriční hodnoty potravin online. Vyhledávač je v anglickém jazyce.");
         mealsPageImg.src = "pictures/jahody.jpg";
     }
 
@@ -586,7 +585,7 @@
         clearContentBoxes();
         loadContentBoxes("settings-boxes");
         updateArticle("Nastavení kalorického příjmu",
-            "Vyplň tabulku pro výpočet bazálního metabolismu pro zjištění doporučeného denního kalorického příjmu.");
+            "Vyplň tabulku pro výpočet bazálního metabolismu a zjisti svůj doporučený denní kalorický příjem.");
         settingsPageImg.src = "pictures/breakfast.jpg";
     }
 
@@ -899,7 +898,13 @@
 
     state_button.addEventListener("click", function (e) {
         e.preventDefault();
-        loadStateData();
+        stats._calories = 0.0;
+        stats._protein_income = 0.0;
+        stats._fat_income = 0.0;
+        stats._sugars_income = 0.0;
+        stats.saveStats();
+        stats.updateUserInfo();
+        loadStatePage();
     });
 
     find_meal_button.addEventListener("click", function (e) {
