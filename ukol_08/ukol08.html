@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Lecture 11</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        section {
+            display: none;
+        }
+        section.is-visible {
+            display: block;
+        }
+        #dnd {
+            height:70px;
+            border-radius: 50px;
+            border: 2px dotted #a0a0a0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        #dnd::before {
+            content: "D'n'D here!";
+            color: #2e2e2e;
+        }
+    </style>
+</head>
+<body>
+
+<h1>My cool app</h1>
+
+<nav>
+    <ul>
+        <li><a href="#accesslog">Log</a></li>
+        <li><a href="#imageinfo">Image Info</a></li>
+    </ul>
+</nav>
+
+<hr>
+
+<section data-route="#accesslog">
+    <h2>Log</h2>
+
+    <h2>History entries</h2>
+    <ul id="history-entries"></ul>
+</section>
+
+<section data-route="#imageinfo">
+    <h2>Image Info</h2>
+
+    <div id="dnd"></div>
+    <ul id="imgInfo"></ul>
+    <div id="imgCnt"></div>
+</section>
+
+
+<script type="text/javascript">
+    /*
+        LocalStorage
+            https://developer.mozilla.org/en/docs/Web/API/Window/localStorage
+
+        History API
+            https://developer.mozilla.org/en-US/docs/Web/API/History_API
+
+        File API
+            https://developer.mozilla.org/en-US/docs/Web/API/File
+
+        Filereader API
+            https://developer.mozilla.org/en-US/docs/Web/API/FileReader
+
+        Drag'n'Drop API
+            https://developer.mozilla.org/en-US/docs/Web/API/HTML_Drag_and_Drop_API
+
+    */
+
+    /*
+        1. Routing
+            - There will be two pages, each of them is already in the HTML as sections with data-route attribute
+            - Hide these pages by default with css or javascript
+            - Look at URL and decide which page to display, by default show the "accesslog" page
+                Look at History API link
+            - Re-render when browser URL changes, either by user clicking on link or by pressing browsers back/forward button
+                Look at popstate event on window and use addEventListener to listen on that event
+        2. LocalStorage
+            - Take a look at LocalStorage API
+            - In local storage - save every user access of website, when he comes to the page save the date he came
+            - On "accesslog" page display all of the dates he accessed the page
+        3. File API and Drag'n'Drop
+            - On second page use Drag and Drop API so user can drag and drop image to the rectangle
+            - When user drops image, use File Reader API to read and display name, size and type of image
+    */
+
+    class MyApp {
+        constructor() {
+            this.setRoute("#accesslog");
+             this._imagesCounter = 0;
+
+            window.addEventListener('popstate', () => {
+                this.setRoute(window.location.hash);
+            });
+
+            this.loadVisits();
+
+            let dragAndDropElement = document.getElementById("dnd");
+            dragAndDropElement.addEventListener("dragover", function (e) {
+                e.preventDefault();
+            });
+
+            dragAndDropElement.addEventListener("drop", function (e) {
+                this.showImage(e);
+            }.bind(this));
+        }
+
+        setRoute(hash) {
+            document.title = hash;
+            let hashToChange;
+            if (hash === "#imageinfo") {
+                hashToChange = hash;
+            } else {
+                hashToChange = "#accesslog";
+            }
+            for (let sectionElement of document.querySelectorAll("section")) {
+                if (sectionElement.getAttribute("data-route") === hashToChange) {
+                    sectionElement.classList.add("is-visible");
+                } else {
+                    sectionElement.classList.remove("is-visible");
+                }
+            }
+        }
+
+        loadVisits () {
+            let visitsArray = JSON.parse(localStorage.getItem("visitsArray"));
+            if (visitsArray === null || visitsArray === undefined) {
+                visitsArray = [];
+            }
+            const date = new Date().toLocaleString("cs-CS");
+            visitsArray.push(date);
+            localStorage.setItem("visitsArray", JSON.stringify(visitsArray));
+            let ulElement = document.querySelector('#history-entries');
+
+            let visitCounter = 0;
+            for (let visitDate of visitsArray) {
+                visitCounter++;
+                let li = document.createElement('li');
+                li.style.fontSize = "20px";
+                li.innerText = "Visit number "+visitCounter+" at: "+ visitDate;
+                ulElement.appendChild(li);
+            }
+        }
+
+        isFileImage(file) {
+            return file && file['type'].split('/')[0] === 'image';
+        }
+
+        showImage (e) {
+            e.preventDefault();
+            let files = e.dataTransfer.files;
+
+            let image = document.querySelector("#imgCnt");
+            let imageInfo = document.querySelector("#imgInfo");
+
+            let file;
+
+            if (files.length>0) {
+                file = files[0];
+                if (this.isFileImage(file)) {
+                    let fileReader = new FileReader();
+                    fileReader.addEventListener("load", function () {
+                        let newImage = new Image();
+                        newImage.src = fileReader.result;
+                        image.appendChild(newImage);
+                    });
+                    let li = document.createElement('li');
+                    this._imagesCounter++;
+                    li.innerHTML = `Obrazek cislo ${this._imagesCounter} - typ: ${file.type} velikost: ${file.size} nazev: ${file.name}`;
+                    imageInfo.appendChild(li);
+
+                    fileReader.readAsDataURL(file);
+                } else {
+                    alert("Dragged file is not a picture!");
+                }
+            }
+        }
+    }
+
+    new MyApp();
+
+</script>
+</body>
+</html>
