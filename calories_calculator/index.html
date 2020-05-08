@@ -877,7 +877,7 @@
         stats.saveStats();
         stats.updateUserInfo();
 
-        loadStatePage();
+        window.location.hash = "#state";
     });
 
     basal_button.addEventListener("click", function (e) {
@@ -898,7 +898,7 @@
             document.querySelector('.goal:checked').value);
         stats.saveStats();
         stats.updateUserInfo();
-        loadStatePage();
+        window.location.hash = "#state";
     });
 
     state_button.addEventListener("click", function (e) {
@@ -909,7 +909,7 @@
         stats._sugars_income = 0.0;
         stats.saveStats();
         stats.updateUserInfo();
-        loadStatePage();
+        window.location.hash = "#state";
     });
 
     find_meal_button.addEventListener("click", function (e) {
@@ -1054,7 +1054,7 @@
                         if (element.quantity === "Nespecifikováno") {
                             document.getElementById("meal-weight-input").value = 0;
                         } else {document.getElementById("meal-weight-input").value = element.quantity}
-                        loadHomePage();
+                        window.location.hash = "#home";
                     });
 
                     document.getElementById(toAppendContentId).appendChild(createdElement);
