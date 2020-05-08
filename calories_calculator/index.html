@@ -404,10 +404,10 @@
         <nav id="menu">
             <label id="menu-control" for="menu-control-input">Menu</label><input type="checkbox" id="menu-control-input" />
             <ul class="main_menu">
-                <li><a href="home">Domů</a></li>
-                <li><a href="state">Denní příjem</a></li>
-                <li><a href="meals">Potraviny</a></li>
-                <li><a href="settings">Nastavení</a></li>
+                <li><a href="#home">Domů</a></li>
+                <li><a href="#state">Denní příjem</a></li>
+                <li><a href="#meals">Potraviny</a></li>
+                <li><a href="#settings">Nastavení</a></li>
             </ul>
             <div class="user-box">
                 <h4>Uživatel</h4>
@@ -554,6 +554,37 @@
         loadHomePage();
         stats = new Stats();
         stats.updateUserInfo();
+        window.addEventListener('popstate', () => {
+            this.setPageRoute(window.location.hash);
+        });
+    }
+
+    function setPageRoute(hash) {
+        switch (hash) {
+            case "#home": {
+                document.title = "Domů";
+                loadHomePage();
+                break;
+            }
+            case "#state": {
+                loadStatePage();
+                document.title = "Denní příjem";
+                break;
+            }
+            case "#meals": {
+                loadMealsPage();
+                document.title = "Potraviny";
+                break;
+            }
+            case "#settings": {
+                loadSettingsPage();
+                document.title = "Nastavení";
+                break;
+            }
+            default :
+                document.title = "Domů";
+                break;
+        }
     }
 
     function loadHomePage() {
@@ -588,34 +619,6 @@
             "Vyplň tabulku pro výpočet bazálního metabolismu a zjisti svůj doporučený denní kalorický příjem.");
         settingsPageImg.src = "pictures/breakfast.jpg";
     }
-
-    for (let element of document.getElementsByTagName("a")){
-            element.addEventListener("click", function(e) {
-                e.preventDefault();
-                document.getElementById("menu-control-input").checked = false;
-                if(e.target && e.target.nodeName === "A") {
-                    switch (e.target.innerText) {
-                        case "Domů": {
-                            loadHomePage();
-                            break;
-                        }
-                        case "Denní příjem": {
-                            loadStatePage();
-                            break;
-                        }
-                        case "Potraviny": {
-                            loadMealsPage();
-                            break;
-                        }
-                        case "Nastavení": {
-                            loadSettingsPage();
-                            break;
-                        }
-                        default :
-                    }
-                }
-            });
-        }
 
     function clearContentBoxes() {
         for (let element of document.getElementsByClassName("content-box")) {
@@ -710,7 +713,6 @@
     }
 
     class Stats {
-
         constructor() {
             this._name = "Neznámý";
             this._basal = 0.01;
@@ -917,7 +919,6 @@
         getFoodArrayByName(document.getElementById("find-meal-input").value,"find-meal-content-all");
         document.getElementById("find-meal-input").innerText = "";
     });
-
     // INPUT VALIDATION SECTION
 
     function validateNumberInput(inputElementId) {
@@ -958,8 +959,6 @@
             }
         return success;
     }
-
-
     //FETCHING DATA FROM Nutrition-ix BY XML-HTTP-REQUEST + PROMISES INTERFACE ( WORKS ONLY WITH INTERNET CONNECTION )
 
     function getFirstTenResults(json) {
@@ -1062,8 +1061,6 @@
                 errorLog(error);
             });
     }
-
-
 </script>
 </body>
 </html>
