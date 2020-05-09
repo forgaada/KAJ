@@ -427,8 +427,6 @@
 
                 <label class="label-content" id="income">Dnešní příjem činí:</label>
                 <label class="label-content" id="basal">Váš cílový kalorický příjem: [kcal].</label>
-                <button class="content-button" id="state_button">Vymazat</button>
-
             </div>
             <div class="content-box meals-boxes">
                 <h4>Hledej jídlo online</h4>
@@ -524,7 +522,6 @@
 <script>
     const meal_button = document.getElementById("meal_button");
     const basal_button = document.getElementById("basal_button");
-    const state_button = document.getElementById("state_button");
     const find_meal_button = document.getElementById("find-meal-button");
 
     //Images
@@ -546,8 +543,17 @@
         pageLogoImg.src = this.src;
     };
 
+    // Initial variables
     let stats;
     let pieChart = null;
+    let meals = [];
+
+    // Initial today's Date
+    let today = new Date();
+    let dd = String(today.getDate()).padStart(2, '0');
+    let mm = String(today.getMonth() + 1).padStart(2, '0');
+    let yyyy = today.getFullYear();
+    today = mm + '/' + dd + '/' + yyyy;
 
     window.onload = load;
 
@@ -559,6 +565,7 @@
         window.addEventListener('popstate', () => {
             this.setPageRoute(window.location.hash);
         });
+        loadMeals();
     }
 
     function setPageRoute(hash) {
@@ -666,10 +673,76 @@
             stats._sugars_income.toFixed(0) + "g sacharidů";
 
         document.getElementById("basal").innerText = "Váš cílový kalorcký příjem:  "+ stats.basal.toFixed(0) + " [kcal].";
+
+        /** Loading meals by today's date **/
+
+        loadMeals();
+
+        document.querySelector("#today-meals-all").innerHTML = "Přehled dnešních pokrmů: ";
+
+        for (let meal of meals) {
+            if (meal._date === today) {
+                renderMeal(meal);
+            }
+        }
+
     }
 
     function getId () {
         return '_' + Math.random().toString(36).substr(2, 9);
+    }
+
+    function loadMeals() {
+        if (localStorage.getItem("meals") !== null) {
+            meals = [];
+            let mealsJson = JSON.parse(localStorage.getItem("meals"));
+            for (let meal of mealsJson) {
+                let newMeal = new Meal(meal._name,meal._calories,meal._protein,meal._fat,meal._sugars,meal._weight);
+                newMeal.setDate(meal._date);
+                meals.push(meal);
+            }
+        } else {
+            meals = [];
+        }
+    }
+
+    function updateMeals() {
+        localStorage.setItem("meals",JSON.stringify(meals));
+    }
+
+    function renderMeal (meal) {
+        let createdElement = document.createElement("label");
+        createdElement.classList.add("label-content");
+        createdElement.innerText = meal._name + " \r S hodnotami na 100g: Kalorie: "
+            + meal._calories +" [kcal] - Bílkoviny "+meal._protein+" g - Tuky: "+meal._fat+ " g - Sacharidy: "
+            + meal._sugars+ " g. V množství "+ meal._weight +" g." + '\r \r ';
+
+        let createdButton = document.createElement("button");
+        createdButton.classList.add("content-button");
+        createdButton.innerText = "Smazat";
+        createdElement.appendChild(createdButton);
+        document.querySelector("#today-meals-all").appendChild(createdElement);
+
+        createdButton.addEventListener("click", function () {
+            document.querySelector("#today-meals-all").removeChild(createdElement);
+            for( let i = 0; i < meals.length; i++) {
+                if ( meals[i]._id === this._id) {
+                    meals.splice(i, 1); i--;
+                }
+            }
+            stats._calories -= meal._calories * meal._weight / 100;
+                if (stats._calories<0) {stats._calories = 0}
+            stats._fat_income -= meal._fat * meal._weight / 100;
+                if (stats._fat_income <0) {stats._fat_income = 0}
+            stats._sugars_income -= meal._sugars * meal._weight / 100;
+                if (stats._sugars_income<0) {stats._sugars_income = 0}
+            stats._protein_income -= meal._protein * meal._weight / 100;
+                if (stats._protein_income<0) {stats._protein_income = 0}
+            stats.saveStats();
+            stats.updateUserInfo();
+            updateMeals();
+            loadStateData();
+        }.bind(meal))
     }
 
     class Meal {
@@ -681,6 +754,12 @@
             this._sugars = sugars;
             this._weight = weight;
             this._id = "meal_"+getId();
+            this._date = today;
+        }
+
+        pushMeal () {
+            meals.push(this);
+            updateMeals();
         }
 
         get name() {return this._name;}
@@ -697,22 +776,8 @@
 
         get id() {return this._id;}
 
-        renderMeal () {
-            let createdElement = document.createElement("label");
-            createdElement.classList.add("label-content");
-            createdElement.innerText = this.name + " \r S hodnotami na 100g: Kalorie: "
-                + this.calories +" [kcal] - Bílkoviny "+this.protein+" g - Tuky: "+this.fat+ " g - Sacharidy: "
-                + this.sugars+ " g. V množství "+ this.weight +" g." + '\r \r ';
-
-            let createdButton = document.createElement("button");
-            createdButton.classList.add("content-button");
-            createdButton.innerText = "Smazat";
-            createdElement.appendChild(createdButton);
-            document.querySelector("#today-meals-all").appendChild(createdElement);
-
-            createdButton.addEventListener("click", function () {
-                document.querySelector("#today-meals-all").removeChild(createdElement);
-            })
+        setDate (date) {
+            this._date = date;
         }
     }
 
@@ -776,11 +841,11 @@
             this._sugars_income = statsObject.sugars;
 
             if (this._name === undefined || this._name === null) {this._name = "Neznámý"}
-            if (this._basal === undefined || this._basal === null) {this._basal = 0.01;}
-            if (this._calories === undefined || this._calories === null) {this._calories = 0.0;}
-            if (this._protein_income === undefined || this._protein_income === null) {this._protein_income = 0.0;}
-            if (this._fat_income === undefined || this._fat_income === null) {this._fat_income = 0.0;}
-            if (this._sugars_income === undefined || this._sugars_income === null) {this._sugars_income = 0.0;}
+            if (this._basal === undefined || this._basal === null || this._basal < 0) {this._basal = 0.01;}
+            if (this._calories === undefined || this._calories === null || this._calories < 0) {this._calories = 0.0;}
+            if (this._protein_income === undefined || this._protein_income === null || this._protein_income < 0) {this._protein_income = 0.0;}
+            if (this._fat_income === undefined || this._fat_income === null || this._fat_income < 0) {this._fat_income = 0.0;}
+            if (this._sugars_income === undefined || this._sugars_income === null || this._sugars_income < 0) {this._sugars_income = 0.0;}
         }
 
         updateUserInfo () {
@@ -846,7 +911,7 @@
             }
     }
 
-    // Adding event listeners to page objects
+    // Adding event listeners to buttons
 
     meal_button.addEventListener("click", function (e) {
         e.preventDefault();
@@ -863,6 +928,7 @@
             document.getElementById("meal-fat-input").value,
             document.getElementById("meal-sugars-input").value,
             document.getElementById("meal-weight-input").value);
+        newMeal.pushMeal();
 
         stats._calories += newMeal.calories * newMeal.weight / 100;
         stats._protein_income += newMeal.protein * newMeal.weight / 100;
@@ -876,7 +942,6 @@
         document.getElementById("meal-sugars-input").value = "";
         document.getElementById("meal-weight-input").value = "";
 
-        newMeal.renderMeal();
         stats.saveStats();
         stats.updateUserInfo();
         window.location.hash = "#state";
@@ -899,18 +964,6 @@
             document.querySelector('.goal:checked').value);
         stats.saveStats();
         stats.updateUserInfo();
-        window.location.hash = "#state";
-    });
-
-    state_button.addEventListener("click", function (e) {
-        e.preventDefault();
-        stats._calories = 0.0;
-        stats._protein_income = 0.0;
-        stats._fat_income = 0.0;
-        stats._sugars_income = 0.0;
-        stats.saveStats();
-        stats.updateUserInfo();
-        loadStateData();
         window.location.hash = "#state";
     });
 
