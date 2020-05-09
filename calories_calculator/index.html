@@ -97,6 +97,7 @@
 
         .page section nav .user-box img{
             align-self: center;
+            border-radius: 50%;
         }
 
         .page section nav .user-box h4{
@@ -845,6 +846,8 @@
             }
     }
 
+    // Adding event listeners to page objects
+
     meal_button.addEventListener("click", function (e) {
         e.preventDefault();
         let textElementsToValidate = ["meal-name-input"];
@@ -876,7 +879,6 @@
         newMeal.renderMeal();
         stats.saveStats();
         stats.updateUserInfo();
-
         window.location.hash = "#state";
     });
 
@@ -887,7 +889,6 @@
         if (!validate(numberElementsToValidate, textElementsToValidate)) {
             return
         }
-        stats = new Stats();
         stats.calculateBasal(
             document.getElementById("name-input").value,
             document.getElementById("weight-input").value,
@@ -909,6 +910,7 @@
         stats._sugars_income = 0.0;
         stats.saveStats();
         stats.updateUserInfo();
+        loadStateData();
         window.location.hash = "#state";
     });
 
@@ -922,6 +924,7 @@
         getFoodArrayByName(document.getElementById("find-meal-input").value,"find-meal-content-all");
         document.getElementById("find-meal-input").innerText = "";
     });
+
     // INPUT VALIDATION SECTION
 
     function validateNumberInput(inputElementId) {
