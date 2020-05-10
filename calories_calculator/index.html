@@ -427,6 +427,7 @@
 
                 <label class="label-content" id="income">Dnešní příjem činí:</label>
                 <label class="label-content" id="basal">Váš cílový kalorický příjem: [kcal].</label>
+                <button class="content-button" id="state_button">Vymazat</button>
             </div>
             <div class="content-box meals-boxes">
                 <h4>Hledej jídlo online</h4>
@@ -522,6 +523,7 @@
 <script>
     const meal_button = document.getElementById("meal_button");
     const basal_button = document.getElementById("basal_button");
+    const state_button = document.getElementById("state_button");
     const find_meal_button = document.getElementById("find-meal-button");
 
     //Images
@@ -964,6 +966,18 @@
             document.querySelector('.goal:checked').value);
         stats.saveStats();
         stats.updateUserInfo();
+        window.location.hash = "#state";
+    });
+
+    state_button.addEventListener("click", function (e) {
+        e.preventDefault();
+        stats._calories = 0.0;
+        stats._protein_income = 0.0;
+        stats._fat_income = 0.0;
+        stats._sugars_income = 0.0;
+        stats.saveStats();
+        stats.updateUserInfo();
+        loadStateData();
         window.location.hash = "#state";
     });
 
