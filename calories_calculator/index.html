@@ -701,7 +701,8 @@
             for (let meal of mealsJson) {
                 let newMeal = new Meal(meal._name,meal._calories,meal._protein,meal._fat,meal._sugars,meal._weight);
                 newMeal.setDate(meal._date);
-                meals.push(meal);
+                newMeal.setId(meal._id);
+                newMeal.pushMeal();
             }
         } else {
             meals = [];
@@ -726,24 +727,24 @@
         document.querySelector("#today-meals-all").appendChild(createdElement);
 
         createdButton.addEventListener("click", function () {
-            document.querySelector("#today-meals-all").removeChild(createdElement);
             for( let i = 0; i < meals.length; i++) {
                 if ( meals[i]._id === this._id) {
                     meals.splice(i, 1); i--;
+                    document.querySelector("#today-meals-all").removeChild(createdElement);
+                    stats._calories -= meal._calories * meal._weight / 100;
+                    if (stats._calories<0) {stats._calories = 0}
+                    stats._fat_income -= meal._fat * meal._weight / 100;
+                    if (stats._fat_income <0) {stats._fat_income = 0}
+                    stats._sugars_income -= meal._sugars * meal._weight / 100;
+                    if (stats._sugars_income<0) {stats._sugars_income = 0}
+                    stats._protein_income -= meal._protein * meal._weight / 100;
+                    if (stats._protein_income<0) {stats._protein_income = 0}
+                    stats.saveStats();
+                    stats.updateUserInfo();
+                    updateMeals();
+                    loadStateData();
                 }
             }
-            stats._calories -= meal._calories * meal._weight / 100;
-                if (stats._calories<0) {stats._calories = 0}
-            stats._fat_income -= meal._fat * meal._weight / 100;
-                if (stats._fat_income <0) {stats._fat_income = 0}
-            stats._sugars_income -= meal._sugars * meal._weight / 100;
-                if (stats._sugars_income<0) {stats._sugars_income = 0}
-            stats._protein_income -= meal._protein * meal._weight / 100;
-                if (stats._protein_income<0) {stats._protein_income = 0}
-            stats.saveStats();
-            stats.updateUserInfo();
-            updateMeals();
-            loadStateData();
         }.bind(meal))
     }
 
@@ -780,6 +781,10 @@
 
         setDate (date) {
             this._date = date;
+        }
+
+        setId (Id) {
+            this._id = Id;
         }
     }
 
