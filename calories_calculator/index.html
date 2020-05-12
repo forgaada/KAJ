@@ -427,7 +427,7 @@
 
                 <label class="label-content" id="income">Dnešní příjem činí:</label>
                 <label class="label-content" id="basal">Váš cílový kalorický příjem: [kcal].</label>
-                <button class="content-button" id="state_button">Vymazat</button>
+                <button class="content-button" id="state_button">Vymazat vše</button>
             </div>
             <div class="content-box meals-boxes">
                 <h4>Hledej jídlo online</h4>
@@ -552,14 +552,15 @@
 
     // Initial today's Date
     let today = new Date();
-    let dd = String(today.getDate()).padStart(2, '0');
-    let mm = String(today.getMonth() + 1).padStart(2, '0');
-    let yyyy = today.getFullYear();
-    today = mm + '/' + dd + '/' + yyyy;
 
     window.onload = load;
 
     function load() {
+        let dd = String(today.getDate()).padStart(2, '0');
+        let mm = String(today.getMonth() + 1).padStart(2, '0');
+        let yyyy = today.getFullYear();
+        today = mm + '/' + dd + '/' + yyyy;
+
         loadHomePage();
         document.title = "Domů";
         stats = new Stats();
@@ -827,18 +828,28 @@
                 calories: this._calories,
                 protein: this._protein_income,
                 fat: this._fat_income,
-                sugars: this._sugars_income
+                sugars: this._sugars_income,
+                date: today
             };
             localStorage.setItem("stats", JSON.stringify(saveObject));
         }
 
         loadStats () {
-            if (localStorage.getItem("stats") === null) {
+            let loadObject = localStorage.getItem("stats");
+            if (loadObject === null) {
                 this.saveStats();
                 return;
             }
-            let loadObject = localStorage.getItem("stats");
             let statsObject = JSON.parse(loadObject);
+            if (statsObject.date !== today) {
+                this._calories = 0.0;
+                this._protein_income = 0.0;
+                this._fat_income = 0.0;
+                this._sugars_income = 0.0;
+                this._basal = statsObject.basal;
+                this._name = statsObject.name;
+                return;
+            }
 
             this._name = statsObject.name;
             this._basal = statsObject.basal;
@@ -976,12 +987,10 @@
 
     state_button.addEventListener("click", function (e) {
         e.preventDefault();
-        stats._calories = 0.0;
-        stats._protein_income = 0.0;
-        stats._fat_income = 0.0;
-        stats._sugars_income = 0.0;
-        stats.saveStats();
+        localStorage.clear();
+        stats = new Stats();
         stats.updateUserInfo();
+        loadMeals();
         loadStateData();
         window.location.hash = "#state";
     });
