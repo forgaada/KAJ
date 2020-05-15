@@ -588,14 +588,15 @@
     let meals = [];
 
     // Initial today's Date
-    let today = new Date();
+    let todayDate = new Date();
+    let today;
 
     window.onload = load;
 
     function load() {
-        let dd = String(today.getDate()).padStart(2, '0');
-        let mm = String(today.getMonth() + 1).padStart(2, '0');
-        let yyyy = today.getFullYear();
+        let dd = String(todayDate.getDate()).padStart(2, '0');
+        let mm = String(todayDate.getMonth() + 1).padStart(2, '0');
+        let yyyy = todayDate.getFullYear();
         today = mm + '/' + dd + '/' + yyyy;
 
         loadHomePage();
@@ -689,6 +690,7 @@
     }
 
     function loadStateData() {
+        todayDate = new Date();
         document.getElementById("pie-chart").style.display = "initial";
         if (pieChart === null) {
             pieChart = new SVGPieChart("#pie-chart");
@@ -718,14 +720,50 @@
 
         loadMeals();
 
-        document.querySelector("#today-meals-all").innerHTML = "Přehled dnešních pokrmů: ";
+        renderTodayMeals(today);
+
+    }
+
+    function renderTodayMeals(day) {
+        document.querySelector("#today-meals-all").innerHTML = "Přehled pokrmů ("+day+") : ";
+        let createdDiv = document.createElement("div");
+        createdDiv.classList.add("content_inline");
+
+        let createdButtonLastDay = document.createElement("button");
+        createdButtonLastDay.classList.add("content-button");
+        createdButtonLastDay.innerText = "Předešlý den";
+        createdButtonLastDay.addEventListener("click", () => {
+            let d = todayDate;
+            d.setDate(d.getDate() - 1);
+            let dd = String(d.getDate()).padStart(2, '0');
+            let mm = String(d.getMonth() + 1).padStart(2, '0');
+            let yyyy = d.getFullYear();
+            d = mm + '/' + dd + '/' + yyyy;
+            renderTodayMeals(d);
+        });
+
+        let createdButtonNextDay = document.createElement("button");
+        createdButtonNextDay.classList.add("content-button");
+        createdButtonNextDay.innerText = "Příští den";
+        createdButtonNextDay.addEventListener("click", () => {
+            let d = todayDate;
+            d.setDate(d.getDate() + 1);
+            let dd = String(d.getDate()).padStart(2, '0');
+            let mm = String(d.getMonth() + 1).padStart(2, '0');
+            let yyyy = d.getFullYear();
+            d = mm + '/' + dd + '/' + yyyy;
+            renderTodayMeals(d);
+        });
+
+        createdDiv.appendChild(createdButtonLastDay);
+        createdDiv.appendChild(createdButtonNextDay);
+        document.querySelector("#today-meals-all").appendChild(createdDiv);
 
         for (let meal of meals) {
-            if (meal._date === today) {
-                renderMeal(meal);
+            if (meal._date === day) {
+                renderMeal(meal , day);
             }
         }
-
     }
 
     function loadMeals() {
@@ -747,41 +785,42 @@
         localStorage.setItem("meals",JSON.stringify(meals));
     }
 
-    function renderMeal (meal) {
+    function renderMeal (meal, day) {
         let createdElement = document.createElement("label");
         createdElement.classList.add("label-content");
         createdElement.innerText = meal._name + " \r S hodnotami na 100g: Kalorie: "
             + meal._calories +" [kcal] - Bílkoviny "+meal._protein+" g - Tuky: "+meal._fat+ " g - Sacharidy: "
             + meal._sugars+ " g. V množství "+ meal._weight +" g." + '\r \r ';
 
-        let createdButton = document.createElement("button");
-        createdButton.classList.add("content-button");
-        createdButton.innerText = "Smazat";
-        createdElement.appendChild(createdButton);
-        createdElement.style.pointerEvents = "none";
-        createdButton.style.pointerEvents = "auto";
-        document.querySelector("#today-meals-all").appendChild(createdElement);
-
-        createdButton.addEventListener("click", function () {
-            for( let i = 0; i < meals.length; i++) {
-                if ( meals[i]._id === this._id) {
-                    meals.splice(i, 1); i--;
-                    document.querySelector("#today-meals-all").removeChild(createdElement);
-                    stats._calories -= meal._calories * meal._weight / 100;
-                    if (stats._calories<0) {stats._calories = 0}
-                    stats._fat_income -= meal._fat * meal._weight / 100;
-                    if (stats._fat_income <0) {stats._fat_income = 0}
-                    stats._sugars_income -= meal._sugars * meal._weight / 100;
-                    if (stats._sugars_income<0) {stats._sugars_income = 0}
-                    stats._protein_income -= meal._protein * meal._weight / 100;
-                    if (stats._protein_income<0) {stats._protein_income = 0}
-                    stats.saveStats();
-                    stats.updateUserInfo();
-                    updateMeals();
-                    loadStateData();
+        if (day === today) {
+            let createdButton = document.createElement("button");
+            createdElement.appendChild(createdButton);
+            createdButton.classList.add("content-button");
+            createdButton.innerText = "Smazat";
+            createdElement.style.pointerEvents = "none";
+            createdButton.style.pointerEvents = "auto";
+            createdButton.addEventListener("click", function () {
+                for( let i = 0; i < meals.length; i++) {
+                    if ( meals[i]._id === this._id) {
+                        meals.splice(i, 1); i--;
+                        document.querySelector("#today-meals-all").removeChild(createdElement);
+                        stats._calories -= meal._calories * meal._weight / 100;
+                        if (stats._calories<0) {stats._calories = 0}
+                        stats._fat_income -= meal._fat * meal._weight / 100;
+                        if (stats._fat_income <0) {stats._fat_income = 0}
+                        stats._sugars_income -= meal._sugars * meal._weight / 100;
+                        if (stats._sugars_income<0) {stats._sugars_income = 0}
+                        stats._protein_income -= meal._protein * meal._weight / 100;
+                        if (stats._protein_income<0) {stats._protein_income = 0}
+                        stats.saveStats();
+                        stats.updateUserInfo();
+                        updateMeals();
+                        loadStateData();
+                    }
                 }
-            }
-        }.bind(meal))
+            }.bind(meal))
+        }
+        document.querySelector("#today-meals-all").appendChild(createdElement);
     }
 
     class AbstractEntity {
