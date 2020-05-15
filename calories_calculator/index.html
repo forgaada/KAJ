@@ -65,7 +65,11 @@
             padding: 20px 30px;
             margin: 5px;
             background-color: #2fd015;
-            transition: all 0.5s;
+            -webkit-transition: all 0.5s ease;
+            -moz-transition: all 0.5s ease;
+            -ms-transition: all 0.5s ease;
+            -o-transition: all 0.5s ease;
+            transition: all 0.5s ease;
             box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
         }
         #menu ul li a:visited { text-decoration: none;}
@@ -181,6 +185,10 @@
             color: white;
             background-color: #2fd015;
             box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+            -webkit-transition: background-color 0.5s;
+            -moz-transition: background-color 0.5s;
+            -ms-transition: background-color 0.5s;
+            -o-transition: background-color 0.5s;
             transition: background-color 0.5s;
             border: 0;
             font-family: "Bookman Old Style", "S", serif;
@@ -264,6 +272,10 @@
             width: 150px;
             margin: 1em;
             box-sizing: border-box;
+            webkit-transition: all 0.5s ease-in;
+            -moz-transition: all 0.5s ease-in;
+            -ms-transition: all 0.5s ease-in;
+            -o-transition: all 0.5s ease-in;
             transition: all 0.5s ease-in;
             color: white;
             box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
@@ -274,6 +286,10 @@
             width: 200px;
             font-size: 25px;
             transform: rotate(90deg);
+            -webkit-transition: all 0.5s ease-in;
+            -moz-transition: all 0.5s ease-in;
+            -ms-transition: all 0.5s ease-in;
+            -o-transition: all 0.5s ease-in;
             transition: all 0.5s ease-in;
         }
 
@@ -324,6 +340,22 @@
         .error {
             border-color: red;
             border-width: 3px;
+        }
+
+        /** Vendor Prefixes for highlighting focused inputs**/
+
+        input[type=text], input[type=number], textarea {
+            -webkit-transition: all 0.30s ease-in-out;
+            -moz-transition: all 0.30s ease-in-out;
+            -ms-transition: all 0.30s ease-in-out;
+            -o-transition: all 0.30s ease-in-out;
+            transition: all 0.30s ease-in-out;
+            outline: none;
+        }
+
+        input[type=text]:focus, input[type=number]:focus, textarea:focus {
+            box-shadow: 0 0 5px rgb(47, 208, 21);
+            border: 2px solid rgb(7, 230, 18);
         }
 
         /** MOBILE / TABLET SECTION **/
@@ -381,6 +413,11 @@
                 background-color:#348022;
                 padding-top: 20px;
                 padding-bottom: 20px;
+
+                -webkit-transition: background-color  0.5s;
+                -moz-transition: background-color  0.5s;
+                -ms-transition: background-color  0.5s;
+                -o-transition: background-color  0.5s;
                 transition: background-color 0.5s;
             }
 
@@ -427,7 +464,7 @@
 
                 <label class="label-content" id="income">Dnešní příjem činí:</label>
                 <label class="label-content" id="basal">Váš cílový kalorický příjem: [kcal].</label>
-                <button class="content-button" id="state_button">Vymazat vše</button>
+                <button class="content-button" id="state_button">Vymazat Data</button>
             </div>
             <div class="content-box meals-boxes">
                 <h4>Hledej jídlo online</h4>
@@ -441,7 +478,7 @@
             </div>
 
             <div class="content-box settings-boxes">
-                <h4>Výpočet bazálního metabolismu</h4>
+                <h4>Výpočet denního kalorického výdeje</h4>
                 <p>
                     <label for="name-input">Vaše jméno: </label><input type="text" id="name-input" placeholder="Pišta">
                     <label for="weight-input">Vaše tělesná hmotnost v [kg]: </label><input type="number" id="weight-input" placeholder="Hmotnost">
@@ -614,7 +651,7 @@
         loadStateData();
         loadContentBoxes("state-boxes");
         updateArticle("Přehled denního příjmu",
-            "Zde nalezneš přehled aktuálního plnění doporučeného denního kalorického příjmu včetně zapsaných jídel.");
+            "Zde nalezneš svůj denní kalorický příjem včetně zapsaných jídel. Pro nastavení výdeje přejdi do 'Nastavení'.");
         statePageImg.src = "pictures/pears.jpg";
     }
 
@@ -629,8 +666,8 @@
     function loadSettingsPage() {
         clearContentBoxes();
         loadContentBoxes("settings-boxes");
-        updateArticle("Nastavení kalorického příjmu",
-            "Vyplň tabulku pro výpočet bazálního metabolismu a zjisti svůj doporučený denní kalorický příjem.");
+        updateArticle("Nastavení kalorického výdeje",
+            "Vyplň tabulku pro výpočet bazálního metabolismu a denního kalorického výdeje a zjisti svůj doporučený denní kalorický příjem.");
         settingsPageImg.src = "pictures/breakfast.jpg";
     }
 
@@ -691,10 +728,6 @@
 
     }
 
-    function getId () {
-        return '_' + Math.random().toString(36).substr(2, 9);
-    }
-
     function loadMeals() {
         if (localStorage.getItem("meals") !== null) {
             meals = [];
@@ -725,6 +758,8 @@
         createdButton.classList.add("content-button");
         createdButton.innerText = "Smazat";
         createdElement.appendChild(createdButton);
+        createdElement.style.pointerEvents = "none";
+        createdButton.style.pointerEvents = "auto";
         document.querySelector("#today-meals-all").appendChild(createdElement);
 
         createdButton.addEventListener("click", function () {
@@ -749,15 +784,25 @@
         }.bind(meal))
     }
 
-    class Meal {
-        constructor(name, calories, protein, fat, sugars, weight) {
+    class AbstractEntity {
+        constructor(name) {
+            this._id = this.getId();
             this._name = name;
+        }
+
+        getId () {
+            return '_' + Math.random().toString(36).substr(2, 9);
+        }
+    }
+
+    class Meal extends AbstractEntity {
+        constructor(name, calories, protein, fat, sugars, weight) {
+            super(name);
             this._calories = calories;
             this._protein = protein;
             this._fat = fat;
             this._sugars = sugars;
             this._weight = weight;
-            this._id = "meal_"+getId();
             this._date = today;
         }
 
@@ -789,9 +834,9 @@
         }
     }
 
-    class Stats {
+    class Stats extends AbstractEntity {
         constructor() {
-            this._name = "Neznámý";
+            super("Neznámý");
             this._basal = 0.01;
             this._calories = 0.0;
             this._protein_income = 0.0;
@@ -870,8 +915,8 @@
             this.loadStats();
             document.getElementById("user-name").innerText =
                 "Uživatel: " + this._name + '\r' +
-                "Basal: "+this.basal.toFixed(0)+ '\r' +
-                "Příjem: "+this._calories.toFixed(0);
+                "Výdej: "+this.basal.toFixed(0)+ " [kcal]" + '\r' +
+                "Příjem: "+this._calories.toFixed(0) + " [kcal]";
         }
 
     }
@@ -992,7 +1037,7 @@
         stats.updateUserInfo();
         loadMeals();
         loadStateData();
-        window.location.hash = "#state";
+        window.location.hash = "#home";
     });
 
     find_meal_button.addEventListener("click", function (e) {
@@ -1119,6 +1164,9 @@
                     createdButton.classList.add("content-button");
                     createdButton.innerText = "Zapsat";
                     createdElement.appendChild(createdButton);
+
+                    createdElement.style.pointerEvents = "none";
+                    createdButton.style.pointerEvents = "auto";
 
                     createdButton.addEventListener("click", function (e) {
                         e.preventDefault();
