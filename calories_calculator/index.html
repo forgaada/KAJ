@@ -178,6 +178,14 @@
             width: 75%;
         }
 
+        .page section article .content-box p input:nth-of-type(odd){
+            background-image: linear-gradient(to left, rgba(124, 255, 68, 0.31), white, white, white);
+        }
+
+        .page section article .content-box p input:nth-of-type(even){
+            background-image: linear-gradient(to left, rgba(14, 140, 0, 0.2), white, white, white);
+        }
+
         .page section article .content-box .content-button {
             align-self: center;
             height: 50px;
@@ -650,7 +658,8 @@
         clearContentBoxes();
         loadContentBoxes("home-boxes");
         updateArticle("Kalkulátor denního kalorického příjmu",
-            "Poznač si, co jsi měl dnes k jídlu. Pro hledání potravin online přejdi na 'Potraviny'.");
+            "Poznač si, co jsi měl dnes k jídlu. Pro hledání potravin online přejdi na 'Potraviny'. Pro zjištění výdeje " +
+            "přejdi do 'Nastavení'");
         homePageImg.src = "pictures/fruit.jpg";
     }
 
@@ -660,7 +669,7 @@
         loadStateData();
         loadContentBoxes("state-boxes");
         updateArticle("Přehled denního příjmu",
-            "Zde nalezneš svůj denní kalorický příjem včetně zapsaných jídel. Pro nastavení výdeje přejdi do 'Nastavení'.");
+            "Zde nalezneš svůj denní kalorický příjem včetně zapsaných jídel. Pro odstranění všech svých záznamů stiskni 'Vymazat data'.");
         statePageImg.src = "pictures/pears.jpg";
     }
 
@@ -678,7 +687,7 @@
         clearContentBoxes();
         loadContentBoxes("settings-boxes");
         updateArticle("Nastavení kalorického výdeje",
-            "Vyplň tabulku pro výpočet bazálního metabolismu a denního kalorického výdeje a zjisti svůj doporučený denní kalorický příjem.");
+            "Vyplň tabulku pro výpočet bazálního metabolismu a denního kalorického výdeje a zjisti tak svůj doporučený denní kalorický příjem.");
         settingsPageImg.src = "pictures/breakfast.jpg";
     }
 
@@ -1049,7 +1058,7 @@
 
             // Returns coordinates to specific angle from center of coordinate system.
             getCartesianCoordinates(centerX, centerY, angle) {
-                let angleInRadians = (angle-90) * Math.PI / 180.0;
+                let angleInRadians = (angle-90) * 3.14159 / 180.0;
 
                 return {
                     x: centerX + (100 * Math.cos(angleInRadians)),
