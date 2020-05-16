@@ -125,7 +125,7 @@
             background-color: white;
         }
 
-        /** MAIN SECTION **/
+        /** ARTICLE SECTION **/
 
         .page section article {
             display: flex;
@@ -261,7 +261,7 @@
             border-radius: 50%;
         }
 
-        /** ASIDE MENU SECTION **/
+        /** ASIDE SECTION **/
 
         .page section aside {
             display: flex;
@@ -272,7 +272,7 @@
             width: 150px;
             margin: 1em;
             box-sizing: border-box;
-            webkit-transition: all 0.5s ease-in;
+            -webkit-transition: all 0.5s ease-in;
             -moz-transition: all 0.5s ease-in;
             -ms-transition: all 0.5s ease-in;
             -o-transition: all 0.5s ease-in;
@@ -336,13 +336,13 @@
             color: white;
         }
 
-        /** ERROR **/
+        /** ERROR INPUTS **/
         .error {
             border-color: red;
             border-width: 3px;
         }
 
-        /** Vendor Prefixes for highlighting focused inputs**/
+        /** FOCUSED INPUTS **/
 
         input[type=text], input[type=number], textarea {
             -webkit-transition: all 0.30s ease-in-out;
@@ -358,7 +358,7 @@
             border: 2px solid rgb(7, 230, 18);
         }
 
-        /** MOBILE / TABLET SECTION **/
+        /** Media Queries - MOBILE SECTION **/
 
         @media only screen and (max-width: 768px) {
             .page section {
@@ -433,7 +433,6 @@
     </style>
 </head>
 <body>
-
 <div class="page">
     <header>
         <h1>Kalkulačka kalorií</h1>
@@ -454,7 +453,7 @@
             </div>
         </nav>
         <article id= "main">
-            <h2 id="article-heading"></h2>
+            <h2 id="article-heading">Kalkulátor denního kalorického příjmu</h2>
             <p id="article-content"></p>
             <img id="page-logo" src="pictures/logo.png" alt="food">
             <div class="content-box state-boxes">
@@ -558,12 +557,13 @@
     </footer>
 </div>
 <script>
+    // Initialize document buttons
     const meal_button = document.getElementById("meal_button");
     const basal_button = document.getElementById("basal_button");
     const state_button = document.getElementById("state_button");
     const find_meal_button = document.getElementById("find-meal-button");
 
-    //Images
+    // Initialize images
     let pageLogoImg = document.getElementById("page-logo");
     let homePageImg = new Image();
     homePageImg.onload = function () {
@@ -582,17 +582,22 @@
         pageLogoImg.src = this.src;
     };
 
-    // Initial variables
-    let stats;
+    // Initialize global variables
+    let stats = null;
     let pieChart = null;
     let meals = [];
 
-    // Initial today's Date
+    // Initialize today's Date
     let todayDate = new Date();
     let today;
 
+    // Set window.onload function
     window.onload = load;
 
+    /*
+        Sets today variable to today's date in 'mm/dd/yyyy' format. Loads stats and meals variables.
+        Adds eventListener to popstate event for changing page and loads home page.
+     */
     function load() {
         let dd = String(todayDate.getDate()).padStart(2, '0');
         let mm = String(todayDate.getMonth() + 1).padStart(2, '0');
@@ -609,6 +614,7 @@
         loadMeals();
     }
 
+    // Changes page title and loads current page according to given hash.
     function setPageRoute(hash) {
         document.getElementById("menu-control-input").checked = false;
         switch (hash) {
@@ -639,6 +645,7 @@
         }
     }
 
+    // Loads home page and updates page content accordingly.
     function loadHomePage() {
         clearContentBoxes();
         loadContentBoxes("home-boxes");
@@ -647,6 +654,7 @@
         homePageImg.src = "pictures/fruit.jpg";
     }
 
+    // Loads state page with user stats and updates content accordingly.
     function loadStatePage() {
         clearContentBoxes();
         loadStateData();
@@ -656,6 +664,7 @@
         statePageImg.src = "pictures/pears.jpg";
     }
 
+    // Loads meals page for searching meals and updates content accordingly.
     function loadMealsPage() {
         clearContentBoxes();
         loadContentBoxes("meals-boxes");
@@ -664,6 +673,7 @@
         mealsPageImg.src = "pictures/jahody.jpg";
     }
 
+    // Loads settings page and updates content accordingly.
     function loadSettingsPage() {
         clearContentBoxes();
         loadContentBoxes("settings-boxes");
@@ -672,23 +682,31 @@
         settingsPageImg.src = "pictures/breakfast.jpg";
     }
 
+
+    // Hides all elements with '.content-box' class from page.
     function clearContentBoxes() {
         for (let element of document.getElementsByClassName("content-box")) {
             element.style.display = "none";
         }
     }
 
+    // Displays all elements with given className on page.
     function loadContentBoxes(className) {
         for (let element of document.getElementsByClassName(className)) {
             element.style.display = "flex";
         }
     }
 
+    // Updates page article content and heading.
     function updateArticle(heading, content) {
         document.getElementById("article-heading").innerText = heading;
         document.getElementById("article-content").innerText = content;
     }
 
+    /*
+       Loads state page elements. Dumps user's income and basal values and all today's meals.
+       Based on income / outcome (basal) ratio creates SVGPieChart of today's income percentage.
+    */
     function loadStateData() {
         todayDate = new Date();
         document.getElementById("pie-chart").style.display = "initial";
@@ -716,14 +734,14 @@
 
         document.getElementById("basal").innerText = "Váš cílový kalorcký příjem:  "+ stats.basal.toFixed(0) + " [kcal].";
 
-        /** Loading meals by today's date **/
-
+        // Load all eaten meals.
         loadMeals();
 
+        // Render only today's meals.
         renderTodayMeals(today);
-
     }
 
+    // Renders all meals eaten on the specific day and creates buttons for browsing also the previous days meals.
     function renderTodayMeals(day) {
         document.querySelector("#today-meals-all").innerHTML = "Přehled pokrmů ("+day+") : ";
         let createdDiv = document.createElement("div");
@@ -759,6 +777,7 @@
         createdDiv.appendChild(createdButtonNextDay);
         document.querySelector("#today-meals-all").appendChild(createdDiv);
 
+        // Render all meals by specific day.
         for (let meal of meals) {
             if (meal._date === day) {
                 renderMeal(meal , day);
@@ -766,6 +785,7 @@
         }
     }
 
+    // Loads meals variable from localStorage and parses it into global variable 'meals' via JSON.
     function loadMeals() {
         if (localStorage.getItem("meals") !== null) {
             meals = [];
@@ -781,10 +801,14 @@
         }
     }
 
+    // Updates meals variable in localStorage with global 'meals' variable and uses stringify method to make it JSON object.
     function updateMeals() {
         localStorage.setItem("meals",JSON.stringify(meals));
     }
-
+    /*
+        Renders meal's values into a new element but only for meal eaten today
+        (means with '_today' variable matching with global today variable).
+    */
     function renderMeal (meal, day) {
         let createdElement = document.createElement("label");
         createdElement.classList.add("label-content");
@@ -799,6 +823,8 @@
             createdButton.innerText = "Smazat";
             createdElement.style.pointerEvents = "none";
             createdButton.style.pointerEvents = "auto";
+                // Adds eventListener for delete button "click" event.
+                // Removes meal element and subtracts nutrition values from stats.
             createdButton.addEventListener("click", function () {
                 for( let i = 0; i < meals.length; i++) {
                     if ( meals[i]._id === this._id) {
@@ -823,17 +849,25 @@
         document.querySelector("#today-meals-all").appendChild(createdElement);
     }
 
+    /*
+        Represents parent class for Meal and Stats classes.
+     */
     class AbstractEntity {
         constructor(name) {
             this._id = this.getId();
             this._name = name;
         }
 
+        // Creates unique id string.
         getId () {
             return '_' + Math.random().toString(36).substr(2, 9);
         }
     }
 
+    /*
+        Represents class containing all nutritional values of meal entity and also '_id' and '_name' variables
+        from it's parent class.
+     */
     class Meal extends AbstractEntity {
         constructor(name, calories, protein, fat, sugars, weight) {
             super(name);
@@ -845,6 +879,7 @@
             this._date = today;
         }
 
+        // Pushes this meal into global meals variable and stores it into localStorage.
         pushMeal () {
             meals.push(this);
             updateMeals();
@@ -873,6 +908,10 @@
         }
     }
 
+    /*
+        Represents class containing all user stats values (nutrition values) and also '_id' and '_name' variables
+        from it's parent class.
+     */
     class Stats extends AbstractEntity {
         constructor() {
             super("Neznámý");
@@ -884,6 +923,7 @@
             this.loadStats();
         }
 
+        // Calculate user's total calories outcome from input values.
         calculateBasal (name, weight, height, age, sex, activity, goal) {
             this._name = name;
             this._weight = weight;
@@ -905,6 +945,7 @@
             return this._basal;
         }
 
+        // Stores stats variable to localStorage.
         saveStats () {
             let saveObject = {
                 name: this._name,
@@ -918,6 +959,7 @@
             localStorage.setItem("stats", JSON.stringify(saveObject));
         }
 
+        // Loads stats variable from localStorage.
         loadStats () {
             let loadObject = localStorage.getItem("stats");
             if (loadObject === null) {
@@ -950,6 +992,7 @@
             if (this._sugars_income === undefined || this._sugars_income === null || this._sugars_income < 0) {this._sugars_income = 0.0;}
         }
 
+        // Updates user panel with brief stats info.
         updateUserInfo () {
             this.loadStats();
             document.getElementById("user-name").innerText =
@@ -960,12 +1003,16 @@
 
     }
 
+    /*
+        Represents class for rendering percentage donut charts via SVG path elements.
+     */
     class SVGPieChart {
             constructor (svgElementId) {
                 this._svg = document.querySelector(svgElementId);
                 this._svgNs = "http://www.w3.org/2000/svg";
             }
 
+            // Draws path element curved as a circle to create a chart (similar to donut chart).
             drawChart (percentage, color, customChart) {
                 if (percentage === null) {percentage = 0}
                 if (percentage>100) {percentage = 100}
@@ -989,6 +1036,7 @@
                 this._svg.appendChild(textElement);
             }
 
+            // Returns arc attributes for a path element.
             setArc(x, y, angleTo){
                 let start = this.getCartesianCoordinates(x, y, angleTo);
                 let end = this.getCartesianCoordinates(x, y, 0);
@@ -999,8 +1047,9 @@
                 return `M ${start.x} ${start.y} A 100 100 0 ${arcFlag} 0 ${end.x} ${end.y}`;
             }
 
+            // Returns coordinates to specific angle from center of coordinate system.
             getCartesianCoordinates(centerX, centerY, angle) {
-                let angleInRadians = (angle-90) * 3.14 / 180.0;
+                let angleInRadians = (angle-90) * Math.PI / 180.0;
 
                 return {
                     x: centerX + (100 * Math.cos(angleInRadians)),
@@ -1013,8 +1062,12 @@
             }
     }
 
-    // Adding event listeners to buttons
+    // Adding event listeners to button elements.
 
+    /*
+        Creates new Meal object, saves it into meals array and stores it to localStorage.
+        Updates user stats, empties input values and redirects to state page.
+     */
     meal_button.addEventListener("click", function (e) {
         e.preventDefault();
         let textElementsToValidate = ["meal-name-input"];
@@ -1049,6 +1102,9 @@
         window.location.hash = "#state";
     });
 
+    /*
+        Updates stats object, saves it to localStorage and redirects to state page.
+     */
     basal_button.addEventListener("click", function (e) {
         e.preventDefault();
         let textElementsToValidate = ["name-input"];
@@ -1069,6 +1125,7 @@
         window.location.hash = "#state";
     });
 
+    // Wipes out all stored localStorage data and redirects to home page.
     state_button.addEventListener("click", function (e) {
         e.preventDefault();
         localStorage.clear();
@@ -1079,6 +1136,7 @@
         window.location.hash = "#home";
     });
 
+    // Renders meals found by Nutritionix API (up to top 10 results).
     find_meal_button.addEventListener("click", function (e) {
         e.preventDefault();
         let textElementsToValidate = ["find-meal-input"];
@@ -1090,8 +1148,9 @@
         document.getElementById("find-meal-input").innerText = "";
     });
 
-    // INPUT VALIDATION SECTION
+    // Simple input validation
 
+    // Validates number input on being non-negative, non-empty, number value. Eventually input turns red.
     function validateNumberInput(inputElementId) {
         let element = document.getElementById(inputElementId);
         if (element.value < 0 || element.value==="" || isNaN(element.value)) {
@@ -1104,9 +1163,10 @@
         return true;
     }
 
+    // Validates text input on being non-empty value up to 50 chars long. Eventually input turns red.
     function validateTextInput(inputElementId) {
         let element = document.getElementById(inputElementId);
-        if (element.value === "" || element.value.length>150) {
+        if (element.value === "" || element.value.length>50) {
             element.classList.add("error");
             return false;
         } else if (element.classList.contains("error")) {
@@ -1116,6 +1176,7 @@
         return true;
     }
 
+    // Validates text and number input arrays.
     function validate(numberInputs, textInputs) {
         let success = true;
             for (let id of numberInputs) {
@@ -1130,8 +1191,10 @@
             }
         return success;
     }
-    //FETCHING DATA FROM Nutrition-ix BY XML-HTTP-REQUEST + PROMISES INTERFACE ( WORKS ONLY WITH INTERNET CONNECTION )
 
+    // Loads data from Nutrition-ix API by XML-HTTP-REQUEST + Promises interface (works only with internet connection).
+
+    // Returns first ten meal element results from JSON object.
     function getFirstTenResults(json) {
         let elements = [];
         for (let i = 0; i < 10; i++) {
@@ -1152,8 +1215,11 @@
         return elements;
     }
 
+    // Returns new Promise filled with result of specified request to search specific meal by name  on Nutritionix API.
     function getFoodRequest(name) {
         return new Promise((resolve, reject) => {
+
+            // Creates new XHR, opens with specified values for getting all needed nutrition values and sets request headers.
             const xhr = new XMLHttpRequest();
             xhr.open("GET", "https://nutritionix-api.p.rapidapi.com/v1_1/search/"+name+"?fields=item_name%2Cnf_calories" +
                 "%2Cnf_protein%2Cnf_total_fat%2Cnf_serving_size_qty%2Cnf_serving_size_unit%2Cbrand_name%2Cnf_sugars"+"%2C"+"nf_serving_weight_grams");
@@ -1180,6 +1246,7 @@
         console.log('Error Occurred :', err);
     }
 
+    // Asynchronously renders getFirstTenResults function result as a meal elements.
     async function getFoodArrayByName(name, toAppendContentId) {
         document.getElementById(toAppendContentId).innerText = "Výsledky hledání (0 z 10):";
         await getFoodRequest(name)
