@@ -179,11 +179,11 @@
         }
 
         .page section article .content-box p input:nth-of-type(odd){
-            background-image: linear-gradient(to left, rgba(124, 255, 68, 0.31), white, white, white);
+            background-color: white;
         }
 
         .page section article .content-box p input:nth-of-type(even){
-            background-image: linear-gradient(to left, rgba(14, 140, 0, 0.2), white, white, white);
+            background-color: #ebebeb;
         }
 
         .page section article .content-box .content-button {
@@ -447,7 +447,7 @@
     </header>
     <section>
         <nav id="menu">
-            <label id="menu-control" for="menu-control-input">Menu</label><input type="checkbox" id="menu-control-input" />
+            <label id="menu-control" for="menu-control-input"><img alt="Menu" src="pictures/mobile-nav.png" height="20"></label><input type="checkbox" id="menu-control-input" />
             <ul class="main_menu">
                 <li><a href="#home">Domů</a></li>
                 <li><a href="#state">Denní příjem</a></li>
@@ -506,10 +506,10 @@
                         <input class="activity" type="radio" id="activity_1" name="activity" value="1.2" checked> Sedavé zaměst. + žádný trénink
                     </label>
                     <label>
-                        <input class="activity" type="radio" id="activity_2" name="activity" value="1.4" checked> Sedavé zaměst. + trénink vyšší intenzity
+                        <input class="activity" type="radio" id="activity_2" name="activity" value="1.4" checked> Sedavé zaměst. + trénink 1x - 2x týdně
                     </label>
                     <label>
-                        <input class="activity" type="radio" id="activity_3" name="activity" value="1.6" checked> Sedavé zaměst. + trénink 3x- 4x týdně
+                        <input class="activity" type="radio" id="activity_3" name="activity" value="1.6" checked> Sedavé zaměst. + trénink 3x - 4x týdně
                     </label>
                     <label>
                         <input class="activity" type="radio" id="activity_4" name="activity" value="1.8" checked> Sedavé zaměst. + trénink 6x týdně
@@ -1172,10 +1172,10 @@
         return true;
     }
 
-    // Validates text input on being non-empty value up to 50 chars long. Eventually input turns red.
+    // Validates text input on being non-empty value up to 100 chars long. Eventually input turns red.
     function validateTextInput(inputElementId) {
         let element = document.getElementById(inputElementId);
-        if (element.value === "" || element.value.length>50) {
+        if (element.value === "" || element.value.length>100) {
             element.classList.add("error");
             return false;
         } else if (element.classList.contains("error")) {
@@ -1255,7 +1255,7 @@
         console.log('Error Occurred :', err);
     }
 
-    // Asynchronously renders getFirstTenResults function result as a meal elements.
+    // Asynchronously renders getFirstTenResults function result as meal elements.
     async function getFoodArrayByName(name, toAppendContentId) {
         document.getElementById(toAppendContentId).innerText = "Výsledky hledání (0 z 10):";
         await getFoodRequest(name)
