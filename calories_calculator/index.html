@@ -590,6 +590,9 @@
         pageLogoImg.src = this.src;
     };
 
+    // Initialize sounds
+    const eatingSound = new Audio("sounds/eating-sound.mp3");
+
     // Initialize global variables
     let stats = null;
     let pieChart = null;
@@ -1079,6 +1082,11 @@
      */
     meal_button.addEventListener("click", function (e) {
         e.preventDefault();
+
+        // Reset eating sound
+        eatingSound.pause();
+        eatingSound.currentTime = 0;
+
         let textElementsToValidate = ["meal-name-input"];
         let numberElementsToValidate = ["meal-calories-input","meal-protein-input","meal-fat-input",
             "meal-sugars-input","meal-weight-input"];
@@ -1105,6 +1113,9 @@
         document.getElementById("meal-fat-input").value = "";
         document.getElementById("meal-sugars-input").value = "";
         document.getElementById("meal-weight-input").value = "";
+
+        // Play eating sound
+        eatingSound.play();
 
         stats.saveStats();
         stats.updateUserInfo();
