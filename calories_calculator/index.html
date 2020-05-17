@@ -592,6 +592,7 @@
 
     // Initialize sounds
     const eatingSound = new Audio("sounds/eating-sound.mp3");
+    const removeSound = new Audio("sounds/remove-sound.mp3");
 
     // Initialize global variables
     let stats = null;
@@ -840,6 +841,8 @@
             createdButton.addEventListener("click", function () {
                 for( let i = 0; i < meals.length; i++) {
                     if ( meals[i]._id === this._id) {
+                        removeSound.pause();
+                        removeSound.currentTime = 0;
                         meals.splice(i, 1); i--;
                         document.querySelector("#today-meals-all").removeChild(createdElement);
                         stats._calories -= meal._calories * meal._weight / 100;
@@ -854,6 +857,7 @@
                         stats.updateUserInfo();
                         updateMeals();
                         loadStateData();
+                        removeSound.play();
                     }
                 }
             }.bind(meal))
